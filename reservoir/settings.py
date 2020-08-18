@@ -147,3 +147,35 @@ STATIC_ROOT = os.environ.get('RESERVOIR_STATIC_ROOT', '/var/www/reservoir')
 STATICFILES_DIRS = [
     './reservoir/third_party/3dmr/mainapp/static',
 ]
+
+
+# Logging
+DEFAULT_LOG_LEVEL = os.environ.get('RESERVOIR_LOG_LEVEL', 'DEBUG')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[H3DMR {levelname} {asctime} {filename}:{lineno}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/h3dmr.log',
+            'maxBytes': 1024*1024*15, # 15MB
+            'backupCount': 10,
+            'formatter': 'simple',
+        }
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': os.environ.get('H3DMR_LOG_LEVEL', DEFAULT_LOG_LEVEL),
+    }
+}
