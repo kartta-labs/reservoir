@@ -150,14 +150,12 @@ STATICFILES_DIRS = [
 
 
 # Logging
-DEFAULT_LOG_LEVEL = os.environ.get('RESERVOIR_LOG_LEVEL', 'DEBUG')
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'simple': {
-            'format': '[H3DMR {levelname} {asctime} {filename}:{lineno}] {message}',
+            'format': '[RESERVOIR {levelname} {asctime} {filename}:{lineno}] {message}',
             'style': '{',
         },
     },
@@ -176,6 +174,6 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console', 'file'],
-        'level': os.environ.get('H3DMR_LOG_LEVEL', DEFAULT_LOG_LEVEL),
+        'level': os.environ.get('RESERVOIR_LOG_LEVEL', 'DEBUG'),
     }
 }
