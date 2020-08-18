@@ -94,8 +94,12 @@ WSGI_APPLICATION = 'reservoir.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('RESERVOIR_DB_NAME', '3dmr'),
+        'USER': os.environ.get('RESERVOIR_DB_USER', '3dmr'),
+        'PASSWORD': os.environ.get('RESERVOIR_DB_PASSWORD','3dmr'),
+        'HOST': os.environ.get('RESERVOIR_DB_HOST','127.0.0.1'),
+        'PORT': os.environ.get('RESERVOIR_DB_PORT','5432'),
     }
 }
 
