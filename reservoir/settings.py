@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'mod_wsgi.server',
-    'third_party.3dmr',
+    'reservoir.third_party.3dmr',
 ]
 
 MIDDLEWARE = [
@@ -138,6 +138,8 @@ USE_TZ = True
 
 STATIC_URL = os.environ.get('RESERVOIR_STATIC_URL', '/static/')
 
+STATIC_ROOT = os.environ.get('RESERVOIR_STATIC_ROOT', '/var/www/reservoir')
+
 STATICFILES_DIRS = [
-    ("3dmr", os.path.join(BASE_DIR,'third_party','3dmr','mainapp','static'))
+    './reservoir/third_party/3dmr/mainapp/static',
 ]
