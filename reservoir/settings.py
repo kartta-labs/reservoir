@@ -139,5 +139,5 @@ USE_TZ = True
 STATIC_URL = os.environ.get('RESERVOIR_STATIC_URL', '/static/')
 
 STATICFILES_DIRS = [
-    ("3dmr", BASE_DIR / "third_party/3dmr/mainapp/static")
+    ("3dmr", os.path.join(BASE_DIR,'third_party','3dmr','mainapp','static'))
 ]
