@@ -1,0 +1,66 @@
+{% extends "mainapp/layout.html" %}
+{% block pagename %}Search Results{% endblock %}
+{% block headadditions %}
+<style>
+	.render-pane {
+		min-height: 256px;
+	}
+</style>
+{% for model in models %}
+<link rel="preload" href="/api/model/{{ model.model_id }}/{{ model.revision }}" as="fetch" crossorigin>
+{% endfor %}
+{% endblock %}
+{% block body %}
+<div class="container">
+	<div class="col-12">
+		<div class="page-header">
+			<h1>Search Results
+			{% if query %}
+			<small>'{{ query }}'{% if tag or category %},{% endif %}</small>
+			{% endif %}
+			{% if category %}
+			<small>category '{{ category }}'{% if tag %},{% endif %}</small>
+			{% endif %}
+			{% if tag %}
+			<small>tag '{{ tag }}'</small>
+			{% endif %}
+			</h1>
+		</div>
+	</div>
+	{% if models %}
+	<div class="row flex">
+		{% for model in models %}
+			{% include "mainapp/modelpanel.html" %}
+		{% endfor %}
+	</div>
+	{% endif %}
+	{% if paginator %}
+	<div class="row" style="margin-bottom:30px;text-align:center;">
+		<div class="btn-group" role="group" aria-label="...">
+			{% for page in paginator.page_range %}
+			{% if page == page_id %}
+			<a class="btn btn-primary disabled">{{ page }}</a>
+			{% else %}
+			<a href="{% url 'search' %}{{ url_params }}&page={{ page }}" class="btn btn-default">{{ page }}</a>
+			{% endif %}
+			{% endfor %}
+		</div>
+	</div>
+	{% else %}
+	<p>No models were found with those parameters.</p>
+	{% endif %}
+</div>
+{% endblock %}
+{% block footeradditions %}
+{% load static %}
+{% load compress %}
+{% compress js %}
+<script src="{% static 'mainapp/lib/three.js' %}"></script>
+<script src="{% static 'mainapp/lib/OBJLoader.js' %}"></script>
+<script src="{% static 'mainapp/lib/MTLLoader.js' %}"></script>
+<script src="{% static 'mainapp/lib/OrbitControls.js' %}"></script>
+<script src="{% static 'mainapp/lib/zip.js' %}"></script>
+<script src="{% static 'mainapp/lib/zip-ext.js' %}"></script>
+<script src="{% static 'mainapp/preview.js' %}"></script>
+{% endcompress %}
+{% endblock %}

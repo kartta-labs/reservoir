@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% block head %}
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>3D Model Repository - {% block pagename %}{% endblock %}</title>
+	{% load static %}
+	<link rel="stylesheet" href="{% static 'mainapp/lib/bootstrap.min.css' %}">
+	{% load compress %}
+	{% compress css inline %}
+	<link rel="stylesheet" href="{% static 'mainapp/lib/bootstrap-theme.min.css' %}">
+	<link rel="stylesheet" href="{% static 'mainapp/main.css' %}">
+	{% endcompress %}
+	{% block headadditions %}
+	{% endblock %}
+	{% endblock %}
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-static-top" style="margin-bottom:0">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="true" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					{% if user.is_authenticated %}
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					{% endif %}
+				</button>
+				<a class="navbar-brand" href="{% url 'index' %}">3D Model Repository</a>
+				<a class="navbar-brand navbar-short" href="{% url 'index' %}">3DMR</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse in" aria-expanded="true" style role="menu">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="{% url 'docs' %}">API Docs</a></li>
+					<li><a href="{% url 'downloads' %}">Downloads</a></li>
+					<li><a href="{% url 'map' %}">Map</a></li>
+					{% if user.is_authenticated %}
+					<li><a href="{% url 'upload' %}">Upload Model</a></li>
+					<li><a href="{% url 'logout' %}">Log out</a></li>
+					<li><a href="{% url 'user' username=''%}"><img src="{{ user.profile.avatar }}" alt=""> {{ user.get_username }}</a></li>
+					{% else %}
+					<li><a href="{% url 'social:begin' 'openstreetmap' %}">Login</a></li>
+					{% endif %}
+				</ul>
+				<form class="navbar-form navbar-left" action="{% url 'search' %}" method="GET">
+					<input type="text" class="form-control" id="search" placeholder="Search..." title="Search" name="query" {% if query %}value="{{ query }}"{% endif %}>
+				</form>
+			</div>
+		</div>
+	</nav>
+	{% if messages %}
+	<div class="container">
+		<br>
+		<div class="row">
+		{% for message in messages %}
+			{% if message.tags == 'error' %}
+			<div class="alert alert-danger" role="alert">
+			{% else %}
+			<div class="alert alert-{{ message.tags }}" role="alert">
+			{% endif %}
+			{{ message }}
+			</div>
+		{% endfor %}
+		</div>
+	</div>
+	{% endif %}
+	{% block body %}
+	{% endblock %}
+	<script src="{% static 'mainapp/lib/jquery.min.js' %}"></script>
+	<script src="{% static 'mainapp/lib/bootstrap.min.js' %}"></script>
+	{% block footeradditions %}
+	{% endblock %}
+</body>
+</html>

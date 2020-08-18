@@ -1,0 +1,30 @@
+<div class="col-md-4 col-sm-6 col-xs-12">
+	{% if model.is_hidden %}
+	<div class="panel panel-danger">
+	{% else %}
+	<div class="panel panel-primary">
+	{% endif %}
+		<div class="panel-heading">
+			<h3 class="panel-title"><a href="{% url 'model' model_id=model.model_id revision=model.revision %}">{{ model.title }}</a></h3>
+		</div>
+		<div class="render-pane" id="render-pane{{ model.model_id }}.{{ model.revision }}">
+		</div>
+		<div class="panel-body">
+			<p>Categories:
+				{% for category in model.categories.all %}
+				<a href="{% url 'search' %}?category={{ category.name }}"><span class="label label-default">{{ category.name }}</span></a>
+				{% endfor %}
+			</p>
+			<p>Tags:
+				{% for k, v in model.tags.items %}
+				<a href="{% url 'search' %}?tag={{ k }}={{ v }}"><span class="label label-default">{{ k }}={{ v }}</span></a>
+				{% endfor %}
+			</p>
+			{% if hide_user %}
+			<p>Upload date: {{ model.upload_date|date:"c" }}</p>
+			{% else %}
+			<p>Uploaded by <a href="{% url 'user' username=model.author.username %}"><span class="label label-default">{{ model.author.username }}</span></a> on {{ model.upload_date|date:"c" }}</p>
+			{% endif %}
+		</div>
+	</div>
+</div>

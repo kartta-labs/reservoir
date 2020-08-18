@@ -1,0 +1,34 @@
+{% extends "mainapp/layout.html" %}
+{% block pagename %}Map{% endblock %}
+{% block headadditions %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'mainapp/lib/leaflet.css' %}">
+<script src="{% static 'mainapp/lib/leaflet.js' %}"></script>
+<style>
+	html, body {
+		width: 100%;
+		height: 100%;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	#mapdiv {
+		display: block;
+		position: absolute;
+		height: auto;
+		bottom: 0px;
+		top: 0px;
+		left: 0px;
+		right: 0px;
+		margin-top: 50px;
+	}
+</style>
+{% load static %}
+<script src="{% static 'mainapp/map.js' %}"></script>
+{% endblock %}
+{% block body %}
+<div id="mapdiv"></div>
+<script>
+initMap('mapdiv', 0.0, 0.0);
+</script>
+{% endblock %}

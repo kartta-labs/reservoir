@@ -1,0 +1,39 @@
+{% extends "mainapp/layout.html" %}
+{% block pagename %}Homepage{% endblock %}
+{% block headadditions %}
+<style>
+	.render-pane {
+		min-height: 256px;
+	}
+</style>
+{% for model in models %}
+<link rel="preload" href="/api/model/{{ model.model_id }}/{{ model.revision }}" as="fetch" crossorigin>
+{% endfor %}
+{% endblock %}
+{% block body %}
+<div class="container">
+	<div class="col-12">
+		<h1>3D Model Repository</h1>
+        <p>This is a repository for storing models for use in OSM 3D visualizers. Login using OSM OAuth on the top right. There is a <a href="https://wiki.openstreetmap.org/wiki/3D_Model_Repository">wiki page</a> and a <a href="https://gitlab.com/n42k/3dmr">GitLab repository</a> available. You may also express your thoughts on the <a href="https://forum.openstreetmap.org/viewtopic.php?pid=677724">3D subforum</a> of the OSM forums.</p>
+	</div>
+	<hr>
+	<div class="row flex">
+		{% for model in models %}
+			{% include "mainapp/modelpanel.html" %}
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}
+{% block footeradditions %}
+{% load static %}
+{% load compress %}
+{% compress js %}
+<script src="{% static 'mainapp/lib/three.js' %}"></script>
+<script src="{% static 'mainapp/lib/OBJLoader.js' %}"></script>
+<script src="{% static 'mainapp/lib/MTLLoader.js' %}"></script>
+<script src="{% static 'mainapp/lib/OrbitControls.js' %}"></script>
+<script src="{% static 'mainapp/lib/zip.js' %}"></script>
+<script src="{% static 'mainapp/lib/zip-ext.js' %}"></script>
+<script src="{% static 'mainapp/preview.js' %}"></script>
+{% endcompress %}
+{% endblock %}

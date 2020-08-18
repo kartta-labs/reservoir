@@ -1,0 +1,11 @@
+{% extends "mainapp/layout.html" %}
+{% block pagename %}Downloads{% endblock %}
+{% block body %}
+<div class="container">
+	<div class="col-12">
+		<h1>Downloads</h1>
+		{% load static %}
+		<p>You can download the latest nightly <a href="{% static 'mainapp/3dmr-nightly.zip' %}">here</a>.</p>
+	</div>
+</div>
+{% endblock %}

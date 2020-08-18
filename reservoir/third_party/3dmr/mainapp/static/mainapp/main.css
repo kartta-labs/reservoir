@@ -1,0 +1,112 @@
+body {
+	padding-bottom: 50px;
+}
+
+.col-md-4.col-sm-6 .panel-body div:first-of-type {
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.col-md-4.col-sm-6 img {
+	width: 100%;
+	max-height: 256px;
+	object-fit: cover;
+}
+
+.row.flex {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.col-md-4 .panel-body > p {
+	line-height: 1.5em;
+}
+
+nav img {
+	max-width: 24px;
+	max-height: 24px;
+	margin-right: 12px;
+}
+
+.panel-new {
+	background-color: #fcf8e3;
+}
+
+.form-group.required > label:before {
+	color: #60ff14;
+	content: "*";
+	margin-right: 5px;
+}
+
+.navbar-short {
+	display: none;
+}
+
+@media (max-width: 1010px) and (min-width: 768px) {
+	.navbar-brand {
+		display: none;
+	}
+
+	.navbar-short {
+		display: block;
+	}
+}
+
+@media (max-width: 884px) and (min-width: 768px) {
+	#search {
+		width: 85px;
+	}
+}
+
+.nav-tabs {
+	border-bottom: none;
+}
+
+canvas {
+	width: 100%;
+}
+
+/* Specific to user page */
+.col-lg-4.col-12 {
+	text-align: center;
+}
+
+.col-lg-4.col-12 table {
+	margin: auto;
+}
+
+.col-lg-4.col-12 td {
+	padding: 3px;
+}
+
+.col-lg-8.col-12 > .col-12 {
+	margin-bottom: 30px;
+	text-align: center;
+	clear: both;
+}
+
+/* Specific to model upload page */
+form > #map {
+	margin: 0px auto;
+	width: 450px;
+	height: 300px;
+}
+
+form > #map-descriptor {
+	margin-top: 5px;
+	text-align: center;
+}
+
+.panel-body > a.btn-default  {
+	margin-bottom: 10px;
+}
+
+/* Specific to model page */
+.panel-footer > form > button {
+	padding-bottom: 1px;
+	padding-top: 1px;
+}
+
+.panel-body.panel-hidden {
+	background-color: #faf0f0;
+}

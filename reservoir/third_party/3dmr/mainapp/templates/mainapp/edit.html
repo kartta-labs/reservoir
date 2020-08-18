@@ -1,0 +1,19 @@
+{% extends "mainapp/layout.html" %}
+{% block pagename %}Upload Model{% endblock %}
+{% block headadditions %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'mainapp/lib/leaflet.css' %}">
+<script src="{% static 'mainapp/lib/leaflet.js' %}"></script>
+{% endblock %}
+{% block body %}
+<div class="container">
+	<div class="col-12">
+		<h1>Edit Model Metadata</h1>
+		{% with edit=True %}
+		{% with form_metadata=True %}
+		{% include 'mainapp/modelform.html' %}
+		{% endwith %}
+		{% endwith %}
+	</div>
+</div>
+{% endblock %}
