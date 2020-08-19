@@ -359,7 +359,6 @@ def user(request, username):
     context = {
         'owner': {
             'username': user.username,
-            'avatar': user.profile.avatar,
             'profile': user.profile,
             'models': results,
             'changes': changes,
