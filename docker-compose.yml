@@ -30,7 +30,7 @@ services:
     environment:
       DATABASE_URL: 'postgres://reservoir:reservoir@reservoir-db:5432'
       DJANGO_MANAGEPY_MIGRATE: 'on'
-      RESERVOIR_MODEL_DIR: '/reservoir/models'
+      RESERVOIR_MODEL_DIR: '/dreservoir/models'
       RESERVOIR_DB_HOST: 'reservoir-db'
       RESERVOIR_LOG_LEVEL: 'DEBUG'
       RESERVOIR_PORT: "${RESERVOIR_PORT:-8080}"
