@@ -8,7 +8,7 @@ from django.contrib import messages
 from .models import Model, LatestModel, Change, Category, Location
 from .utils import MODEL_DIR
 
-from mainapp.markdown import markdown
+from .markdown import markdown
 
 logger = logging.getLogger(__name__)
 

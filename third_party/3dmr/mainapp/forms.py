@@ -1,7 +1,7 @@
 from django import forms
 from .utils import get_kv, LICENSES_FORM
 from zipfile import ZipFile, BadZipFile
-from mainapp.model_extractor import ModelExtractor
+from .model_extractor import ModelExtractor
 from pywavefront import Wavefront
 
 class TagField(forms.CharField):

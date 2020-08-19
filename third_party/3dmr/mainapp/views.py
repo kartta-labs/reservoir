@@ -3,7 +3,7 @@ import logging
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage
-from social_django.models import UserSocialAuth
+# from social_django.models import UserSocialAuth
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.contrib import messages
@@ -11,8 +11,8 @@ from django.contrib import messages
 from .models import Model, LatestModel, Comment, Category, Change, Ban, Location
 from .forms import UploadFileForm, UploadFileMetadataForm, MetadataForm
 from .utils import get_kv, update_last_page, get_last_page, MODEL_DIR, CHANGES, admin, LICENSES_DISPLAY
-import mainapp.database as database
-from mainapp.markdown import markdown
+from . import database 
+from .markdown import markdown
 
 logger = logging.getLogger(__name__)
 
