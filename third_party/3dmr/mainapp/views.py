@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 def index(request):
+    
     update_last_page(request)
 
     MODELS_IN_INDEX_PAGE = 6
@@ -29,6 +30,13 @@ def index(request):
     context = {
             'models': models[:MODELS_IN_INDEX_PAGE],
     }
+
+    if request.user is None:
+        logger.debug('User is none.')
+    elif request.user.is_authenticated:
+        logger.debug('User is authenticated as: {}, {}'.format(request.user.username, request.user.email))
+    else:
+        logger.debug('User is not authenticated.')
 
     return render(request, 'mainapp/index.html', context)
 
