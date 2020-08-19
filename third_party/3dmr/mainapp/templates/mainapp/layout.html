@@ -45,8 +45,6 @@
 					<li><a href="{% url 'upload' %}">Upload Model</a></li>
 					<li><a href="{% url 'logout' %}">Log out</a></li>
 					<li><a href="{% url 'user' username=''%}"><img src="{{ user.profile.avatar }}" alt=""> {{ user.get_username }}</a></li>
-					{% else %}
-					<li><a href="{% url 'social:begin' 'openstreetmap' %}">Login</a></li>
 					{% endif %}
 				</ul>
 				<form class="navbar-form navbar-left" action="{% url 'search' %}" method="GET">
