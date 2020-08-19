@@ -1,0 +1,56 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: "3.3"
+
+services:
+  reservoir-db:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: reservoir
+      POSTGRES_USER: reservoir
+      POSTGRES_PASSWORD: reservoir
+      restart: always
+    expose:
+      - "5432"
+    volumes:
+      - ${RESERVOIR_PROJECT_DIR:-.}/initdb.sql:/docker-entrypoint-initdb.d/init.sql        
+  reservoir:
+    environment:
+      DATABASE_URL: 'postgres://reservoir:reservoir@reservoir-db:5432'
+      DJANGO_MANAGEPY_MIGRATE: 'on'
+      RESERVOIR_MODEL_DIR: '/reservoir/models'
+      RESERVOIR_DB_HOST: 'reservoir-db'
+      RESERVOIR_LOG_LEVEL: 'DEBUG'
+      RESERVOIR_PORT: "${RESERVOIR_PORT:-8080}"
+      RESERVOIR_DC_HOST_PORT: "${RESERVOIR_DC_HOST_PORT:-8080}"
+      RESERVOIR_SITE_PREFIX: "${RESERVOIR_SITE_PREFIX:-''}"
+      RESERVOIR_STATIC_URL: "${RESERVOIR_STATIC_URL:-/static/}"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: reservoir
+    ports:
+      - "${RESERVOIR_DC_HOST_PORT:-8080}:${RESERVOIR_PORT:-8080}"
+    volumes:
+      - ${RESERVOIR_PROJECT_DIR:-.}:/dreservoir
+    entrypoint: /dreservoir/docker-compose-entrypoint.sh
+    depends_on:
+      - reservoir-db
+
+    
+
+        
+
+                
