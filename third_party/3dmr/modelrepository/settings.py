@@ -38,14 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'mainapp',
-    'social_django',
     'django_pgviews',
     'compressor',
 ]
-
-SOCIAL_AUTH_URL_NAMESPACE = 'social'
-SOCIAL_AUTH_OPENSTREETMAP_KEY = 'VTwxvHwg0aeX6x30D1U9SK3JaQKcm8THrtJVsY9R'
-SOCIAL_AUTH_OPENSTREETMAP_SECRET = '3QYDebgolnTGAWLn51nZUxynI0D0osmvUaBZsTYh'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,10 +50,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-AUTHENTICATION_BACKENDS = [
-    'social_core.backends.openstreetmap.OpenStreetMapOAuth',
 ]
 
 ROOT_URLCONF = 'modelrepository.urls'
@@ -74,7 +65,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -91,13 +81,14 @@ WSGI_APPLICATION = 'modelrepository.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '3dmr',
-        'USER': '3dmr',
-        'PASSWORD': '123123',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.environ.get('RESERVOIR_DB_NAME', 'reservoir'),
+        'USER': os.environ.get('RESERVOIR_DB_USER', 'reservoir'),
+        'PASSWORD': os.environ.get('RESERVOIR_DB_PASSWORD','reservoir'),
+        'HOST': os.environ.get('RESERVOIR_DB_HOST','127.0.0.1'),
+        'PORT': os.environ.get('RESERVOIR_DB_PORT','5432'),
     }
 }
+
 
 
 # Password validation
