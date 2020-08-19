@@ -7,10 +7,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.http import JsonResponse, FileResponse, Http404, HttpResponseBadRequest, HttpResponse
 from django.core.paginator import Paginator, EmptyPage
-from .models import LatestModel, Comment, Model
-from .utils import get_kv, MODEL_DIR, admin
 from django.db.models import Max
 from django.views.decorators.csrf import csrf_exempt
+
+from .models import LatestModel, Comment, Model
+from .utils import get_kv, MODEL_DIR, admin
 
 RESULTS_PER_API_CALL= 20
 
