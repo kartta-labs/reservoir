@@ -52,10 +52,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
+    'compressor',
+    'social_django', # TODO: Remove me
+    'django_pgviews',
     'rest_framework',
     'rest_framework.authtoken',
     'mod_wsgi.server',
-    'reservoir.third_party.3dmr',
+    'third_party.3dmr',
+    'third_party.3dmr.mainapp',
+]
+
+# TODO: Remove social auth.
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+SOCIAL_AUTH_OPENSTREETMAP_KEY = 'VTwxvHwg0aeX6x30D1U9SK3JaQKcm8THrtJVsY9R'
+SOCIAL_AUTH_OPENSTREETMAP_SECRET = '3QYDebgolnTGAWLn51nZUxynI0D0osmvUaBZsTYh'
+
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.openstreetmap.OpenStreetMapOAuth',
 ]
 
 MIDDLEWARE = [
@@ -95,9 +109,9 @@ WSGI_APPLICATION = 'reservoir.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('RESERVOIR_DB_NAME', '3dmr'),
-        'USER': os.environ.get('RESERVOIR_DB_USER', '3dmr'),
-        'PASSWORD': os.environ.get('RESERVOIR_DB_PASSWORD','3dmr'),
+        'NAME': os.environ.get('RESERVOIR_DB_NAME', 'reservoir'),
+        'USER': os.environ.get('RESERVOIR_DB_USER', 'reservoir'),
+        'PASSWORD': os.environ.get('RESERVOIR_DB_PASSWORD','reservoir'),
         'HOST': os.environ.get('RESERVOIR_DB_HOST','127.0.0.1'),
         'PORT': os.environ.get('RESERVOIR_DB_PORT','5432'),
     }
@@ -145,9 +159,13 @@ STATIC_URL = os.environ.get('RESERVOIR_STATIC_URL', '/static/')
 STATIC_ROOT = os.environ.get('RESERVOIR_STATIC_ROOT', '/var/www/reservoir')
 
 STATICFILES_DIRS = [
-    './reservoir/third_party/3dmr/mainapp/static',
+    './reservoir/third_party/3dmr/mainapp/static/',
 ]
 
+STATICFILES_FINDERS = (
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'compressor.finders.CompressorFinder',
+)
 
 # Logging
 LOGGING = {
@@ -166,7 +184,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/h3dmr.log',
+            'filename': '/var/log/reservoir.log',
             'maxBytes': 1024*1024*15, # 15MB
             'backupCount': 10,
             'formatter': 'simple',
