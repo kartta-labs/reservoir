@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'mod_wsgi.server',
+    'reservoir.api',
     'third_party.3dmr',
     'third_party.3dmr.mainapp',
 ]
