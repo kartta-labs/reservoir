@@ -23,7 +23,8 @@ urlpatterns = [
     url(r'^action/ban$', views.ban, name='ban'),
     url(r'^action/hide_model$', views.hide_model, name='hide_model'),
     url(r'^action/hide_comment$', views.hide_comment, name='hide_comment'),
-    
+    url(r'^action/new_token$', views.new_token, name='new_token'),
+
     url(r'^api/info/(?P<model_id>[0-9]+)$', api.get_info, name='get_info'),
 
     url(r'^api/model/(?P<model_id>[0-9]+)/(?P<revision>[0-9]+)$', api.get_model, name='get_model'),

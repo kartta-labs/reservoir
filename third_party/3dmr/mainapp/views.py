@@ -560,3 +560,17 @@ def hide_comment(request):
         messages.error(request, 'An error occurred. Please try again.')
 
     return redirect(model, model_id=model_id, revision=revision)
+
+def new_token(request):
+    if not request.user.is_authenticated:
+        return redirect(index)
+
+    if request.user.profile.is_banned:
+        messages.error(request, 'You are banned. Requesting a new api toekn is not permitted.')
+        return redirect(index)
+
+    token = Token.objects.get(user=request.user)
+    token.delete()
+    Token.objects.create(user=request.user)
+
+    return redirect(user, username='')

@@ -34,6 +34,12 @@ function enableEdit() {
         <div class ="col-12">
           <br><h3>API Key: {{ owner.api_key }}</h3><br>
         </div>
+        <div>
+          <form action="{% url 'new_token' %}" method="get" id="newTokenForm">
+            <button type="submit" class="btn" style="display: block;" id="newTokenButton">Generate New Token</button>
+          </form>
+        </div>
+        <br>
         {% endif %}
 	<div class="col-lg-8 col-12">
 		<div id="description">
