@@ -7,6 +7,7 @@ from django.core.paginator import Paginator, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.contrib import messages
+from rest_framework.authtoken.models import Token
 
 from .models import Model, LatestModel, Comment, Category, Change, Ban, Location
 from .forms import UploadFileForm, UploadFileMetadataForm, MetadataForm
@@ -356,13 +357,20 @@ def user(request, username):
     except EmptyPage:
         results = []
 
+    try:
+        token = Token.objects.get(user=user)
+    except:
+        logger.warning('User does not have a token')
+        token = None
+
     context = {
         'owner': {
             'username': user.username,
             'profile': user.profile,
             'models': results,
             'changes': changes,
-            'ban': user.ban_set.all().first()
+            'ban': user.ban_set.all().first(),
+            'api_key': token.key
         },
         'paginator': paginator,
         'page_id': page_id,

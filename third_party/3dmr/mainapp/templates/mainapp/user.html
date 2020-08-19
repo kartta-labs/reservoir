@@ -30,6 +30,11 @@ function enableEdit() {
 	<div class="col-12">
 		<h1>{{ owner.username }}'s user page</h1>
 	</div>
+        {% if owner.api_key %}
+        <div class ="col-12">
+          <br><h3>API Key: {{ owner.api_key }}</h3><br>
+        </div>
+        {% endif %}
 	<div class="col-lg-8 col-12">
 		<div id="description">
 			{{ owner.profile.rendered_description|safe }}
