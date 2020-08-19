@@ -29,8 +29,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from third_party.3dmr import urls as 3dmr_urls
+from django.conf.urls import include, url
+# from third_party.3dmr import urls as 3dmr_urls
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    url(r'^', include('third_party.3dmr.mainapp.urls')),
 ]
