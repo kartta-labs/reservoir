@@ -34,7 +34,7 @@ COPY . "/${PROJECT_NAME}"
 WORKDIR "/${PROJECT_NAME}"
 ADD . "/${PROJECT_NAME}"
 
-RUN pip3 install -r "/${PROJECT_NAME}/requirements.txt" -r "/${PROJECT_NAME}/${APPLICATION_NAME}/third_party/3dmr/requirements.txt" 
+RUN pip3 install -r "/${PROJECT_NAME}/requirements.txt" -r "/${PROJECT_NAME}/third_party/3dmr/requirements.txt" 
 
 # Set up a log file with correct permissions for cloud-logging
 RUN touch "/var/log/${APPLICATION_NAME}.log"
