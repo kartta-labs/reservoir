@@ -1,5 +1,6 @@
 import importlib
 import logging
+import json
 from zipfile import ZipFile, BadZipFile
 
 from pywavefront import Wavefront
@@ -10,14 +11,18 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+from .database import delete_model
+
 DEFAULT_MAX_CHAR_LENGTH = 128
 
-# Must use dynamic imports as valid python modules cannot start with a number.
+# Must use dynamic imports from 3dmr as valid python modules cannot start with a number.
 ModelExtractor = getattr(
     importlib.import_module('third_party.3dmr.mainapp.model_extractor'),
     'ModelExtractor')
 
-model_database = importlib.import_module('third_party.3dmr.mainapp.database')
+database = importlib.import_module('third_party.3dmr.mainapp.database')
+
+Model = getattr(importlib.import_module('third_party.3dmr.mainapp.models'), 'Model')
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +100,7 @@ def upload(request):
     -H 'Authorization: Token [insert token here]' \
     http://localhost:8080/api/v1/upload/
     """
+
     logger.debug('{} requests file upload.'.format(request.user.username))
     
     try:
@@ -117,7 +123,7 @@ def upload(request):
         logger.debug('Upload payload verified.')
         logger.debug('Validated meta data: {}'.format(model_metadata.validated_data))
         try:
-            model = model_database.upload(serialized_model.validated_data.get('model_file'),
+            model = database.upload(serialized_model.validated_data.get('model_file'),
                                     {'title': model_metadata.validated_data.get('title'),
                                      'description': model_metadata.validated_data.get('description'),
                                      'latitude': model_metadata.validated_data.get('latitude'),
@@ -148,3 +154,50 @@ def upload(request):
     }
     
     return JsonResponse(response_data, safe=False, status=status.HTTP_201_CREATED)
+
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete(request):
+    """API endpoint to delete a given model by ID.
+    
+    Example:
+    curl -i -X POST -H 'Authorization: Token [insert token here]' \
+    -H 'Content-Type: application/json'
+    http://localhost:8080/api/v1/delete/
+    -d '{"model_id": 12}'
+    """
+
+    try:
+        data = json.loads(request.body)
+        model_id = data['model_id']
+    except:
+        return HttpResponseBadRequest('Must provide model_id as json POST data.')
+    
+    logger.debug('{} requesets deletion of model id {}'.format(request.user.username, model_id))
+    
+    # There may be more than one revision associated with each model id.
+    # However, each revision should belong to the original author.
+    models = Model.objects.filter(model_id=model_id)
+    for m in models:
+        if request.user != m.author:
+            return HttpResponseBadRequest('Must be author of the model to delete the model.')
+    
+    options = {
+        'model_id': model_id,
+    }
+    
+    if delete_model(options):
+        logger.info('Deleted model id: {}'.format(data.get('model_id')))
+    else:
+        err_msg = 'Failed to delete model with id: {}'.format(data.get('model_id'))
+        return HttpResponseServerError(err_msg)
+
+    response_data = {
+        'model_id': model_id,
+        'status': 'deleted'
+    }
+    
+    return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)

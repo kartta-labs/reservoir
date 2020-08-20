@@ -34,5 +34,5 @@ from django.conf.urls import include, url
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^', include('third_party.3dmr.mainapp.urls')),
-    path('api/', include('reservoir.api.v1.urls')),
+    path('api/v1/', include('reservoir.api.v1.urls')),
 ]
