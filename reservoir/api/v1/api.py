@@ -24,6 +24,7 @@ ModelExtractor = getattr(
 database = importlib.import_module('third_party.3dmr.mainapp.database')
 models = importlib.import_module('third_party.3dmr.mainapp.models')
 Model = getattr(models, 'Model')
+LatestModel = getattr(models, 'LatestModel')
 User = getattr(models, 'User')
 
 logger = logging.getLogger(__name__)
@@ -237,3 +238,60 @@ def register(request):
     else:
         logger.error('Failed to create user: {}'.format(serialized.data))
         return HttpResponseBadRequest(serialized._errors)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def revise(request, model_id):
+    """Revise the binary blob associated with a model and increase the revision number.
+
+    Example to modify model number 38:
+    curl -i -X POST -F 'model_file=@/Some/path/to/a/model.zip' \
+    -H 'Authorization: Token [some token]' \
+    http://localhost:8080/api/v1/revise/38
+    """
+    logger.debug('Fetching model with id: {}'.format(model_id))
+    
+    try:
+        m = LatestModel.objects.get(model_id=model_id)
+    except:
+        err_msg = 'Failed to find model with id: {}'.format(model_id)
+        logger.warning(err_msg)
+        return HttpResponseServerError(err_msg)
+        
+    old_revision = m.revision
+
+    if request.user != m.author:
+        err_msg = 'Must be author of the file to revise the model.'
+        return HttpResponseBadRequest(err_msg)
+    
+    if not int(m.model_id) == int(model_id):
+        err_msg = 'Server error: requested model_id: {}, fetched model_id: {}'.format(model_id, m.model_id)
+        logger.error(err_msg)
+        return HttpResponseServerError(err_msg)
+    
+    
+    try:
+        serialized_model = ModelFileSerializer(data=request.data)
+    except:
+        err_msg = 'Faild to deserialize model data revision.'
+        logger.warning(err_msg)
+        return HttpResponseBadRequest(err_msg)
+
+    if serialized_model.is_valid():
+        m = database.upload(serialized_model.validated_data.get('model_file'),
+        {'revision': True,
+         'model_id': model_id,
+         'author': request.user})
+    else:
+        err_msg = 'Failed to validate model payload.'
+        logger.warning(err_msg)
+        return HttpResponseBadRequest(err_msg)
+
+    response_data = {
+        "model_id": model_id,
+        "old_revision":old_revision,
+        "revision": m.revision
+    }
+    
+    return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)

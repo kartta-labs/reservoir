@@ -21,5 +21,6 @@ urlpatterns = [
     path('health/', api.health, name='v1_health'),
     path('upload/', api.upload, name='v1_upload'),
     path('delete/', api.delete, name='v1_delete'),
-    path('register/', api.register, name='v1_register')
+    path('register/', api.register, name='v1_register'),
+    path('revise/<int:model_id>/', api.revise, name='v1_revise_model'),
 ]
