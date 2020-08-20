@@ -18,9 +18,10 @@ from django.urls import path
 from . import api
 
 urlpatterns = [
-    path('health/', api.health, name='v1_health'),
-    path('upload/', api.upload, name='v1_upload'),
     path('delete/', api.delete, name='v1_delete'),
+    path('health/', api.health, name='v1_health'),
+    path('new_token/', api.new_token, name='v1_new_token'),
     path('register/', api.register, name='v1_register'),
     path('revise/<int:model_id>/', api.revise, name='v1_revise_model'),
+    path('upload/', api.upload, name='v1_upload'),
 ]
