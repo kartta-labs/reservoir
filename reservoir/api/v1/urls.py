@@ -18,5 +18,6 @@ from django.urls import path
 from . import api
 
 urlpatterns = [
-    path('v1/health/', api.health, name='v1_health')
+    path('v1/health/', api.health, name='v1_health'),
+    path('v1/upload/', api.upload, name='v1_upload')
 ]
