@@ -1,3 +1,4 @@
-# Byte-compiled files.
 __pycache__/
 models/
+
+.DS_Store
