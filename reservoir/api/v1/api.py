@@ -7,6 +7,7 @@ from pywavefront import Wavefront
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from rest_framework import serializers, status
+from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -21,8 +22,9 @@ ModelExtractor = getattr(
     'ModelExtractor')
 
 database = importlib.import_module('third_party.3dmr.mainapp.database')
-
-Model = getattr(importlib.import_module('third_party.3dmr.mainapp.models'), 'Model')
+models = importlib.import_module('third_party.3dmr.mainapp.models')
+Model = getattr(models, 'Model')
+User = getattr(models, 'User')
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,11 @@ class ModelFileSerializer(serializers.Serializer):
     # and must accept the file upload as a form post. Internally we'll de-serialize
     # the json field with the ModelFileMetadataSerializer
     metadata = serializers.JSONField(required=False)
+
+class UserSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=DEFAULT_MAX_CHAR_LENGTH)
+    password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(default='')
     
 @api_view(['GET'])
 def health(request):
@@ -201,3 +208,32 @@ def delete(request):
     }
     
     return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)
+
+@api_view(['POST'])
+def register(request):
+    serialized = UserSerializer(data=request.data)
+    
+    if serialized.is_valid():
+        logger.debug('data: {}'.format(serialized.data))
+        user = User.objects.create_user(
+            serialized.data.get('username'),
+            serialized.data.get('password'),
+            serialized.data.get('email')
+        )
+
+        user.save()
+
+        token = Token.objects.get(user=user)
+
+        response_data = {
+            'username': serialized.data.get('username'),
+            'email': serialized.data.get('email'),
+            'token': token.key
+        }
+
+        logger.info('Created user: {} with token {}'.format(serialized.data.get('username'), token.key))
+        
+        return JsonResponse(response_data, status=status.HTTP_201_CREATED)
+    else:
+        logger.error('Failed to create user: {}'.format(serialized.data))
+        return HttpResponseBadRequest(serialized._errors)
