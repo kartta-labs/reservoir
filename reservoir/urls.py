@@ -30,9 +30,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include, url
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^', include('third_party.3dmr.mainapp.urls')),
     path('api/v1/', include('reservoir.api.v1.urls')),
 ]
+
+if settings.RESERVOIR_SITE_PREFIX:
+    urlpatterns = [url(f'{settings.RESERVOIR_SITE_PREFIX}/', include(urlpatterns))]
