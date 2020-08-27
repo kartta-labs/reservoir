@@ -26,8 +26,7 @@ RUN apt-get install -y \
         postgresql-contrib \
         apache2 \
         apache2-dev \
-        python3-dev \
-        emacs 
+        python3-dev 
 
 RUN mkdir -p "/${PROJECT_NAME}"
 COPY . "/${PROJECT_NAME}"
