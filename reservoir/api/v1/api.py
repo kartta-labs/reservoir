@@ -61,7 +61,7 @@ class ModelFileField(serializers.FileField):
         logger.debug('Custom zip validation successful.')
         return super().to_internal_value(value)
 
-    
+
 class ModelFileMetadataSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=DEFAULT_MAX_CHAR_LENGTH, default='')
     description = serializers.CharField(max_length=1028, default='')
@@ -75,7 +75,7 @@ class ModelFileMetadataSerializer(serializers.Serializer):
     scale = serializers.FloatField(default=1.0)
     license = serializers.ChoiceField(LICENSE_CHOICES, allow_blank=True)
 
-    
+
 class ModelFileSerializer(serializers.Serializer):
     model_file = ModelFileField()
     # For accepting model metadata as a json blob.
@@ -94,7 +94,7 @@ class UserSerializer(serializers.Serializer):
 @permission_classes([IsAuthenticated])
 def delete(request):
     """API endpoint to delete a given model by ID.
-    
+
     Example:
     curl -i -X POST -H 'Authorization: Token [insert token here]' \
     -H 'Content-Type: application/json'
@@ -107,20 +107,20 @@ def delete(request):
         model_id = data['model_id']
     except:
         return HttpResponseBadRequest('Must provide model_id as json POST data.')
-    
+
     logger.debug('{} requesets deletion of model id {}'.format(request.user.username, model_id))
-    
+
     # There may be more than one revision associated with each model id.
     # However, each revision should belong to the original author.
     models = Model.objects.filter(model_id=model_id)
     for m in models:
         if request.user != m.author:
             return HttpResponseBadRequest('Must be author of the model to delete the model.')
-    
+
     options = {
         'model_id': model_id,
     }
-    
+
     if delete_model(options):
         logger.info('Deleted model id: {}'.format(data.get('model_id')))
     else:
@@ -131,9 +131,9 @@ def delete(request):
         'model_id': model_id,
         'status': 'deleted'
     }
-    
+
     return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)
-    
+
 @api_view(['GET'])
 def health(request):
     logger.debug('Health Check')
@@ -164,7 +164,7 @@ def new_token(request):
 @api_view(['POST'])
 def register(request):
     serialized = UserSerializer(data=request.data)
-    
+
     if serialized.is_valid():
         logger.debug('data: {}'.format(serialized.data))
         user = User.objects.create_user(
@@ -184,13 +184,13 @@ def register(request):
         }
 
         logger.info('Created user: {} with token {}'.format(serialized.data.get('username'), token.key))
-        
+
         return JsonResponse(response_data, status=status.HTTP_201_CREATED)
     else:
         logger.error('Failed to create user: {}'.format(serialized.data))
         return HttpResponseBadRequest(serialized._errors)
 
-    
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -203,26 +203,26 @@ def revise(request, model_id):
     http://localhost:8080/api/v1/revise/38
     """
     logger.debug('Fetching model with id: {}'.format(model_id))
-    
+
     try:
         m = LatestModel.objects.get(model_id=model_id)
     except:
         err_msg = 'Failed to find model with id: {}'.format(model_id)
         logger.warning(err_msg)
         return HttpResponseServerError(err_msg)
-        
+
     old_revision = m.revision
 
     if request.user != m.author:
         err_msg = 'Must be author of the file to revise the model.'
         return HttpResponseBadRequest(err_msg)
-    
+
     if not int(m.model_id) == int(model_id):
         err_msg = 'Server error: requested model_id: {}, fetched model_id: {}'.format(model_id, m.model_id)
         logger.error(err_msg)
         return HttpResponseServerError(err_msg)
-    
-    
+
+
     try:
         serialized_model = ModelFileSerializer(data=request.data)
     except:
@@ -245,7 +245,7 @@ def revise(request, model_id):
         "old_revision":old_revision,
         "revision": m.revision
     }
-    
+
     return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)
 
 
@@ -255,7 +255,7 @@ def revise(request, model_id):
 def upload(request):
     """Api endpoint to upload a model zip file.
 
-    Example: 
+    Example:
     curl -i -X POST -F 'model_file=@/Some/path/to/models.zip' \
     -F 'latitude=38.1' -F 'longitude=2.1' -F 'license=0' -F 'tags=building_id=foo' \
     -H 'Authorization: Token [insert token here]' \
@@ -263,7 +263,7 @@ def upload(request):
     """
 
     logger.debug('{} requests file upload.'.format(request.user.username))
-    
+
     try:
         serialized_model = ModelFileSerializer(data=request.data)
     except:
@@ -272,7 +272,7 @@ def upload(request):
         err_msg = 'Faild to validate model file upload request data.'
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
-    
+
     if serialized_model.is_valid():
         model_metadata = ModelFileMetadataSerializer(data=serialized_model.validated_data.get('metadata'))
     else:
@@ -313,5 +313,5 @@ def upload(request):
         "revision": model.revision,
         "upload_date": model.upload_date,
     }
-    
+
     return JsonResponse(response_data, safe=False, status=status.HTTP_201_CREATED)

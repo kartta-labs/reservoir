@@ -19,11 +19,17 @@ until psql $DATABASE_URL -c '\l'; do
     sleep 10s
 done
 
-mkdir -p /dreservoir/models
 echo "model dir: ${RESERVOIR_MODEL_DIR}"
 echo "RESERVOIR_PORT: ${RESERVOIR_PORT}"
 echo "RESERVOIR_DC_HOST_PORT: ${RESERVOIR_DC_HOST_PORT}"
 echo "RESERVOIR_STATIC_URL: ${RESERVOIR_STATIC_URL}"
+echo "RESERVOIR_MODEL_DIR: ${RESERVOIR_MODEL_DIR}"
+
+mkdir -p "${RESERVOIR_MODEL_DIR}"
+chown -R :www-data "${RESERVOIR_MODEL_DIR}"
+chmod -R a+wr "${RESERVOIR_MODEL_DIR}"
+
+echo "Checking permissions for RESERVOIR_MODEL_DIR: ${RESERVOIR_MODEL_DIR} $(ls -laF ${RESERVOIR_MODEL_DIR})"
 
 python3 /dreservoir/manage.py makemigrations
 python3 /dreservoir/manage.py makemigrations mainapp
