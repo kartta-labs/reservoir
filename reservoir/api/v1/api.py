@@ -64,6 +64,7 @@ class ModelFileField(serializers.FileField):
 
 class ModelFileMetadataSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=DEFAULT_MAX_CHAR_LENGTH, default='')
+    building_id = serializers.CharField(max_length=DEFAULT_MAX_CHAR_LENGTH, default='')
     description = serializers.CharField(max_length=1028, default='')
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
@@ -276,7 +277,7 @@ def upload(request):
     if serialized_model.is_valid():
         model_metadata = ModelFileMetadataSerializer(data=serialized_model.validated_data.get('metadata'))
     else:
-        err_msg = 'Failed to validate model payload.'
+        err_msg = 'Failed to validate model payload: {}'.format(serialized_model.errors)
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
 
