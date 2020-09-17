@@ -47,6 +47,7 @@ class Model(models.Model):
     model_id = models.IntegerField()
     revision = models.IntegerField()
     title = models.CharField(max_length=32)
+    building_id = models.Charfield(max_length=1024)
     description = models.CharField(max_length=512)
     rendered_description = models.CharField(max_length=1024)
     upload_date = models.DateField(auto_now_add=True)

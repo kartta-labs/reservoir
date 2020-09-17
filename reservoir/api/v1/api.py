@@ -287,6 +287,7 @@ def upload(request):
         try:
             model = database.upload(serialized_model.validated_data.get('model_file'),
                                     {'title': model_metadata.validated_data.get('title'),
+                                     'building_id': model_metadata.validated_data.get('building_id'),
                                      'description': model_metadata.validated_data.get('description'),
                                      'latitude': model_metadata.validated_data.get('latitude'),
                                      'longitude': model_metadata.validated_data.get('longitude'),
