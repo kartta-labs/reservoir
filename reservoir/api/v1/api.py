@@ -243,12 +243,43 @@ def revise(request, model_id):
 
     response_data = {
         "model_id": model_id,
+        "building_id": m.building_id,
         "old_revision":old_revision,
         "revision": m.revision
     }
 
     return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)
 
+@api_view(['GET'])
+def search_building_id(request, building_id):
+    """Returns model ids matching a query building_id
+
+    Example:
+    curl -i -X GET http://localhost/api/v1/search/building_id/way/123/
+
+    building_id is specified as a "path" converter in the url patterns so that
+    any "/" characters will be included in the building_id excluding the terminating
+    "/" character. In the above example, the building_id will be the string "way/123".
+    """
+    logging.debug('Searching for models with building_id: {}'.format(building_id))
+
+    response_payload = {'models':[]}
+
+    for model in Model.objects.filter(building_id = building_id).order_by('upload_date'):
+        response_payload['models'].append(
+            {'model_id': model.model_id,
+             'title': model.title,
+             'building_id': model.building_id,
+             'revision': model.revision,
+             'latitude': model.location.latitude,
+             'longitude': model.location.longitude,
+             'upload_date': model.upload_date,
+             'tags': model.tags}
+        )
+
+    logging.debug('Found {} models matching building_id {}'.format(len(response_payload['models']), building_id))
+
+    return JsonResponse(response_payload, safe=False, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
