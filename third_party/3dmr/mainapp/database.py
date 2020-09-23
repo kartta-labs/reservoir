@@ -60,6 +60,7 @@ def upload(model_file, options={}):
                     model_id=next_model_id,
                     revision=1,
                     title=options['title'],
+                    building_id=options.get('building_id'),
                     description=options['description'],
                     rendered_description=rendered_description,
                     tags=options['tags'],
