@@ -34,7 +34,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^', include('third_party.3dmr.mainapp.urls')),
+    path('', include('third_party.3dmr.mainapp.urls')),
     path('api/v1/', include('reservoir.api.v1.urls')),
 ]
 
