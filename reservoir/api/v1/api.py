@@ -1,11 +1,13 @@
 import importlib
 import logging
 import json
+import os
 from zipfile import ZipFile, BadZipFile
 
 from pywavefront import Wavefront
 
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseServerError, FileResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
@@ -26,6 +28,7 @@ models = importlib.import_module('third_party.3dmr.mainapp.models')
 Model = getattr(models, 'Model')
 LatestModel = getattr(models, 'LatestModel')
 User = getattr(models, 'User')
+MODEL_DIR = getattr(importlib.import_module('third_party.3dmr.mainapp.utils'), 'MODEL_DIR')
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +137,37 @@ def delete(request):
     }
 
     return JsonResponse(response_data,status=status.HTTP_202_ACCEPTED)
+
+@api_view(['GET'])
+def download_building_id(request, building_id, revision=None):
+    models = Model.objects.filter(building_id = building_id).order_by('upload_date')
+
+    if not models:
+        logger.info('No models found matching building_id: {}'.format(building_id))
+        return HttpResponse(status=status.HTTP_404_NOT_FOUND)
+
+    logging.info('Found {} models with building_id {}'.format(len(models), building_id))
+
+    m = models.last()
+    if not revision:
+        revision = get_object_or_404(LatestModel, model_id=m.model_id).revision
+        logging.info('Revision was unspecified, found latest revision: {}'.format(revision))
+    else:
+        logging.info('Revision specified as {}'.format(revision))
+
+    model_path = os.path.join(MODEL_DIR, "{}".format(m.model_id), "{}.zip".format(revision))
+    logging.info('model_path: {}'.format(model_path))
+    
+    response = FileResponse(open(model_path, 'rb'))
+
+    response['Content-Disposition'] = 'attachment; filename={}_{}.zip'.format(m.model_id, revision)
+    response['Content-Type'] = 'application/zip'
+    response['Cache-Control'] = 'public, max-age=86400'
+    
+    return response
+
+    logging.error('Error reading model from disk: {}'.format(model_path))
+    return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def health(request):
