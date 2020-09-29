@@ -1,5 +1,5 @@
 # Don't forget to install requirements in ./third_party packages as well.
 # See Dockerfile for example pip invocation.
-djangorestframework
+djangorestframework==3.11.*
 mod_wsgi-standalone
 
