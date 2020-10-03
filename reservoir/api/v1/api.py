@@ -2,6 +2,9 @@ import importlib
 import logging
 import json
 import os
+import io
+import time
+import zipfile
 from zipfile import ZipFile, BadZipFile
 
 from pywavefront import Wavefront
@@ -93,6 +96,9 @@ class UserSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     email = serializers.EmailField(default='')
 
+class DownloadBatchBuildingIdSerializer(serializers.Serializer):
+    building_ids = serializers.ListField(child=serializers.CharField())
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -157,17 +163,72 @@ def download_building_id(request, building_id, revision=None):
 
     model_path = os.path.join(MODEL_DIR, "{}".format(m.model_id), "{}.zip".format(revision))
     logging.info('model_path: {}'.format(model_path))
-    
+
     response = FileResponse(open(model_path, 'rb'))
 
     response['Content-Disposition'] = 'attachment; filename={}_{}.zip'.format(m.model_id, revision)
     response['Content-Type'] = 'application/zip'
     response['Cache-Control'] = 'public, max-age=86400'
-    
+
     return response
 
     logging.error('Error reading model from disk: {}'.format(model_path))
     return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+def download_batch_building_id(request):
+    """API endpoint for downloading multiple models given a list of building ids.
+
+    Example:
+    curl -X -H "Content-Type: application/json" \
+      -d '{"building_ids":["way/123", "way/456"]}' \
+      http://localhost:8080/api/v1/download/batch/building_id/ \
+      -o ~/Downloads/somefile.zip
+    """
+    start = time.perf_counter()
+    logging.info('Batch download via building id list.')
+    building_id_serializer = DownloadBatchBuildingIdSerializer(data=request.data)
+
+    building_ids = []
+    if building_id_serializer.is_valid():
+        building_ids = building_id_serializer.data.get('building_ids')
+        logging.debug(
+            'Request for building_ids: {}'.format(building_ids))
+    else:
+        logging.error('Unable to parse input building ids.')
+        return HttpResponseBadRequest()
+
+    metadata = {}
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, 'a', zipfile.ZIP_STORED, False) as zf:
+        for model in Model.objects.filter(building_id__in=building_ids).order_by('upload_date'):
+            model_id = model.model_id
+            building_id = model.building_id
+            if not metadata.get(model.building_id):
+                latest_model = get_object_or_404(LatestModel, model_id=model_id)
+                revision = latest_model.revision
+                model_path = os.path.join(
+                    MODEL_DIR, "{}".format(model_id), "{}.zip".format(revision))
+                logging.debug(
+                    'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
+                        building_id, model_id, revision, model_path))
+                metadata[building_id] = {'model_id': model_id, 'revision': revision}
+                zf.write(model_path, '{}.zip'.format(building_id.replace('/', '_')))
+        zf.writestr('metadata.json', json.dumps(metadata))
+
+    buf.seek(0)
+    response = FileResponse(buf)
+    response['Content-Disposition'] = 'attachment; filename=models.zip'
+    response['Content-Type'] = 'application/zip'
+    response['Cache-Control'] = 'public, max-age=86400'
+
+    end = time.perf_counter()
+
+    logger.debug(
+        'Batch download of {} building ids completed in {} seconds.'.format(
+            len(building_ids), end-start))
+
+    return response
 
 @api_view(['GET'])
 def health(request):

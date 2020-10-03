@@ -25,5 +25,6 @@ urlpatterns = [
     path('revise/<int:model_id>/', api.revise, name='v1_revise_model'),
     path('search/building_id/<path:building_id>/', api.search_building_id, name='v1_search_building_id'),
     path('download/building_id/<path:building_id>/', api.download_building_id, name='v1_download_building_id'),
+    path('download/batch/building_id/', api.download_batch_building_id, name='v1_download_batch_building_id'),
     path('upload/', api.upload, name='v1_upload'),
 ]
