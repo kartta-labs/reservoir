@@ -11,6 +11,7 @@ from pywavefront import Wavefront
 
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseServerError, FileResponse
 from django.shortcuts import get_object_or_404
+from django.core.serializers import serialize
 from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
@@ -204,7 +205,7 @@ def download_batch_building_id(request):
         for model in Model.objects.filter(building_id__in=building_ids).order_by('upload_date'):
             model_id = model.model_id
             building_id = model.building_id
-            if not metadata.get(model.building_id):
+            if not metadata.get(model.building_id) and not model.is_hidden:
                 latest_model = get_object_or_404(LatestModel, model_id=model_id)
                 revision = latest_model.revision
                 model_path = os.path.join(
@@ -212,7 +213,7 @@ def download_batch_building_id(request):
                 logging.debug(
                     'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
                         building_id, model_id, revision, model_path))
-                metadata[building_id] = {'model_id': model_id, 'revision': revision}
+                metadata[building_id] = serialize('json', [model])
                 zf.write(model_path, '{}.zip'.format(building_id.replace('/', '_')))
         zf.writestr('metadata.json', json.dumps(metadata))
 
