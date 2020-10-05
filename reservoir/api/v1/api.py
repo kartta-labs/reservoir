@@ -18,7 +18,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .database import delete_model
+from .database import get_model_path, delete_model
 
 DEFAULT_MAX_CHAR_LENGTH = 128
 
@@ -208,8 +208,7 @@ def download_batch_building_id(request):
             if not metadata.get(model.building_id) and not model.is_hidden:
                 latest_model = get_object_or_404(LatestModel, model_id=model_id)
                 revision = latest_model.revision
-                model_path = os.path.join(
-                    MODEL_DIR, "{}".format(model_id), "{}.zip".format(revision))
+                model_path = get_model_path(model_id, revision)
                 logging.debug(
                     'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
                         building_id, model_id, revision, model_path))
