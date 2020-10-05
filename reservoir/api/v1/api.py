@@ -233,7 +233,7 @@ def download_batch_building_id(request):
 
     end = time.perf_counter()
 
-    logger.debug(
+    logging.debug(
         'Batch download of {} building ids completed in {} seconds.'.format(
             len(building_ids), end-start))
 
