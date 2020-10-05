@@ -12,13 +12,14 @@ from pywavefront import Wavefront
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseServerError, FileResponse
 from django.shortcuts import get_object_or_404
 from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .database import delete_model
+from .database import get_model_path, delete_model
 
 DEFAULT_MAX_CHAR_LENGTH = 128
 
@@ -40,6 +41,7 @@ LICENSE_CHOICES = [
     (0, 'Creative Commons CC0 1.0 Universal Public Domain Dedication'),
     (1, 'Creative Commons Attribution 4.0 Internal license')
 ]
+
 
 class ModelFileField(serializers.FileField):
     def to_internal_value(self, value):
@@ -162,7 +164,7 @@ def download_building_id(request, building_id, revision=None):
     else:
         logging.info('Revision specified as {}'.format(revision))
 
-    model_path = os.path.join(MODEL_DIR, "{}".format(m.model_id), "{}.zip".format(revision))
+    model_path = get_model_path(m.model_id, revision)
     logging.info('model_path: {}'.format(model_path))
 
     response = FileResponse(open(model_path, 'rb'))
@@ -196,7 +198,8 @@ def download_batch_building_id(request):
         logging.debug(
             'Request for building_ids: {}'.format(building_ids))
     else:
-        logging.error('Unable to parse input building ids.')
+        logging.error(
+            'Unable to parse input building ids: {}'.format(request.data))
         return HttpResponseBadRequest()
 
     metadata = {}
@@ -208,12 +211,17 @@ def download_batch_building_id(request):
             if not metadata.get(model.building_id) and not model.is_hidden:
                 latest_model = get_object_or_404(LatestModel, model_id=model_id)
                 revision = latest_model.revision
-                model_path = os.path.join(
-                    MODEL_DIR, "{}".format(model_id), "{}.zip".format(revision))
+                model_path = get_model_path(model_id, revision)
                 logging.debug(
                     'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
                         building_id, model_id, revision, model_path))
-                metadata[building_id] = serialize('json', [model])
+                metadata[building_id] = json.loads(serialize('json', [model]))
+                logging.debug('metadata: {}'.format(metadata))
+                filename = "{}.zip".format(building_id.replace('/','_'))
+                for modeljson in metadata[building_id]:
+                    modeljson['filename'] = filename
+                    logging.debug('modeljson: {}'.format(modeljson))
+
                 zf.write(model_path, '{}.zip'.format(building_id.replace('/', '_')))
         zf.writestr('metadata.json', json.dumps(metadata))
 
