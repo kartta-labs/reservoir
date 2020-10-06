@@ -80,6 +80,13 @@
 	<script src="{% static 'mainapp/lib/jquery.min.js' %}"></script>
 	<script src="{% static 'mainapp/lib/bootstrap.min.js' %}"></script>
         <script src="/assets/kartta-app.js"></script>
+        <div class="kartta-footer-overlay">
+          <div class="kartta-footer-overlay-container">
+            <div class="kartta-footer-background">
+              <div id="kartta-footer-content"></div>
+            </div>
+          </div>
+        </div>
 	{% block footeradditions %}
 	{% endblock %}
 </body>
