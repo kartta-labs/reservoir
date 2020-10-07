@@ -34,10 +34,11 @@
   <!--     </div> -->
   <!--   </nav> -->
   <!-- </header> -->
-	<nav class="navbar navbar-static-top" style="margin-bottom:0">
+	<nav class="navbar navbar-static-top reservoir-kartta-header" style="margin-bottom:0">
 	  <div class="container-fluid">
 		  <div class="navbar-header">
-                    
+
+<!--                    
 				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="true" aria-controls="navbar">
 					<span class="sr-only">Toggle navigation</span>
 					<span class="icon-bar"></span>
@@ -49,7 +50,8 @@
 					<span class="icon-bar"></span>
 					{% endif %}
 				</button>
-                                <div id="kartta-app-menu"></div>
+-->
+<div class="reservoir-kartta-app-menu-wrapper"><div id="kartta-app-menu"></div></div>
                                 <!--   <a class="navbar-brand" href="{% url 'index' %}">Reservoir Model Repository</a> -->
 				<!-- <a class="navbar-brand navbar-short" href="{% url 'index' %}">Reservoir</a> -->
                                 
@@ -92,13 +94,15 @@
 	<script src="{% static 'mainapp/lib/jquery.min.js' %}"></script>
 	<script src="{% static 'mainapp/lib/bootstrap.min.js' %}"></script>
         <script src="/assets/kartta-app.js"></script>
-        <div class="kartta-footer-overlay">
-          <div class="kartta-footer-overlay-container">
-            <div class="kartta-footer-background">
-              <div id="kartta-footer-content"></div>
-            </div>
-          </div>
-        </div>
+
+<div class="kartta-footer-opaque">
+  <div class="kartta-footer-overlay-container">
+    <div class="kartta-footer-background">
+      <div id="kartta-footer-content"></div>
+    </div>
+  </div>
+</div>
+
 	{% block footeradditions %}
 	{% endblock %}
 </body>

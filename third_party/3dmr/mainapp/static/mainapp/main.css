@@ -110,3 +110,16 @@ form > #map-descriptor {
 .panel-body.panel-hidden {
 	background-color: #faf0f0;
 }
+
+.reservoir-kartta-header {
+  border-bottom: 1px solid black;
+  height: 56px;
+}
+
+.reservoir-kartta-app-menu-wrapper {
+  margin: 0px;
+  padding: 0px;
+  margin-left: -15px;
+  margin-top: 4px;
+  display: inline-block;
+}
