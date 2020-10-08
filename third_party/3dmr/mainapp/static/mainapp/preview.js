@@ -32,7 +32,15 @@ function initTHREE(elementId, options) {
 
 	var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-	var light = new THREE.AmbientLight(0xffffff);
+    var ld1 = new THREE.DirectionalLight(0xffffff, 0.6);
+    ld1.position.set(50, 100, 20);
+    scene.add(ld1);
+
+    var ld2 = new THREE.DirectionalLight(0xffffff, 0.6);
+    ld2.position.set(-50, 100, 20);
+    scene.add(ld2);
+
+	var light = new THREE.AmbientLight(0x999999);
 	scene.add(light);
 
 	renderer.render(scene, camera);
