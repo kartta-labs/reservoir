@@ -1,8 +1,8 @@
 // zip lib, path for other source files
-zip.workerScriptsPath = "/static/mainapp/lib/";
+zip.workerScriptsPath = "/r/static/mainapp/lib/";
 
 function displayPreview(elementId, model_id, revision, options) {
-	var url = "/api/model/" + model_id + "/" + revision;
+	var url = "/r/api/model/" + model_id + "/" + revision;
 
 	if(typeof options === 'undefined')
 		options = {};
