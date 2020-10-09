@@ -14,16 +14,32 @@
 # limitations under the License.
 
 
+echo "model dir: ${RESERVOIR_MODEL_DIR}"
+echo "RESERVOIR_PORT: ${RESERVOIR_PORT}"
+echo "RESERVOIR_DB_HOST_PORT: ${RESERVOIR_DB_HOST_PORT}"
+echo "RESERVOIR_STATIC_URL: ${RESERVOIR_STATIC_URL}"
+echo "RESERVOIR_MODEL_DIR: ${RESERVOIR_MODEL_DIR}"
+
+echo "EDITOR_DB_NAME: ${EDITOR_DB_NAME}"
+echo "EDITOR_DB_USER: ${EDITOR_DB_USER}"
+echo "EDITOR_DB_HOST: ${EDITOR_DB_HOST}"
+
 until psql $DATABASE_URL -c '\l'; do
-    >&2 echo "Posgres is unavailable - sleeping."
+    >&2 echo "Reservoir DB is unavailable - sleeping."
     sleep 10s
 done
 
-echo "model dir: ${RESERVOIR_MODEL_DIR}"
-echo "RESERVOIR_PORT: ${RESERVOIR_PORT}"
-echo "RESERVOIR_DC_HOST_PORT: ${RESERVOIR_DC_HOST_PORT}"
-echo "RESERVOIR_STATIC_URL: ${RESERVOIR_STATIC_URL}"
-echo "RESERVOIR_MODEL_DIR: ${RESERVOIR_MODEL_DIR}"
+echo "Reservoir is connected to Reservoir DB."
+
+EDITOR_DB_URL="postgres://${EDITOR_DB_USER}@${EDITOR_DB_HOST}"
+echo "EDITOR_DB_URL: ${EDITOR_DB_URL}"
+
+until psql $EDITOR_DB_URL -c '\l'; do
+    >&2 echo "Editor DB is unavailable - sleeping."
+    sleep 10s
+done
+
+echo "Reservoir is connected to Editor DB."
 
 if [ -z "${RESERVOIR_SITE_PREFIX}" ]; then
     echo "RESERVOIR_SITE_PREFIX is unset."

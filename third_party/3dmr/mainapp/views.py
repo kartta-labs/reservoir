@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 def index(request):
-    
+
     update_last_page(request)
 
     MODELS_IN_INDEX_PAGE = 6

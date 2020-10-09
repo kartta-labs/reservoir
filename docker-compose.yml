@@ -37,6 +37,10 @@ services:
       RESERVOIR_DC_HOST_PORT: "${RESERVOIR_DC_HOST_PORT:-8080}"
       RESERVOIR_SITE_PREFIX: "${RESERVOIR_SITE_PREFIX}"
       RESERVOIR_STATIC_URL: "${RESERVOIR_STATIC_URL:-/static/}"
+      EDITOR_DB_NAME: "${EDITOR_DB_NAME}"
+      EDITOR_DB_USER: "${EDITOR_DB_USER}"
+      EDITOR_DB_HOST: "${EDITOR_DB_HOST}"
+      EDITOR_DB_PASSWORD: "${EDITOR_DB_PASSWORD}"
     build:
       context: .
       dockerfile: Dockerfile
