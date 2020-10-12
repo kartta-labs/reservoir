@@ -122,6 +122,11 @@ DATABASES = {
     }
 }
 
+EDITOR_DB_HOST = os.environ.get('EDITOR_DB_HOST', '')
+EDITOR_DB_PORT = os.environ.get('EDITOR_DB_PORT', '5432')
+EDITOR_DB_NAME = os.environ.get('EDITOR_DB_NAME', '')
+EDITOR_DB_USER = os.environ.get('EDITOR_DB_USER', '')
+EDITOR_DB_PASSWORD = os.environ.get('EDITOR_DB_PASSWORD', '')
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
