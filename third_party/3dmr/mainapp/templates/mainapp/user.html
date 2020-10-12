@@ -28,7 +28,7 @@ function enableEdit() {
 {% block body %}
 <div class="container">
 	<div class="col-12">
-		<h1>{{ owner.username }}'s user page</h1>
+		<h1>{{ owner.username }}'s User Page</h1>
 	</div>
         {% if owner.api_key %}
         <div class ="col-12">
@@ -64,7 +64,7 @@ function enableEdit() {
 			{% endif %}
 		</div>
 		{% endif %}
-		<h2>{{ owner.username }}'s models</h2><br>
+		<!-- <h2>{{ owner.username }}'s models</h2><br> -->
 		<div class="row flex">
 			{% with hide_user=True %}
 			{% for model in owner.models %}
