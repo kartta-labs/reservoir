@@ -23,11 +23,14 @@ class EditorClient:
 
     def GetUserFromEmail(self, email):
         with self.conn_.cursor() as cur:
-            cur.execute("SELECT display_name FROM USERS WHERE email={}".format(email))
+            cur.execute("SELECT display_name FROM users WHERE email = %s", (email,))
             rows = cur.fetchall()
             if not rows:
+                logging.debug('No rows.')
                 return None
-            return rows[0][0]
+            display_name = rows[0][0]
+            logging.debug('Found display_name: %s', display_name)
+            return display_name
 
 editor_client = EditorClient()
 
@@ -61,7 +64,9 @@ def get_or_create_authenticated_user(request):
 
     # If the editor DB is not aware of this user return None.
     if not display_name:
-        return None
+        logging.info('No display name found.')
+        display_name = '' # Hack, the User object requires a string at construction.
+
 
     # If Reservoir is not aware of this user, create one
     if not User.objects.filter(email=email).exists():
