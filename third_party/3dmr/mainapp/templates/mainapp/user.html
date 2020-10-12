@@ -42,23 +42,6 @@ function enableEdit() {
         <br>
         {% endif %}
 	<div class="col-lg-8 col-12">
-		<div id="description">
-			{{ owner.profile.rendered_description|safe }}
-			{% if user.username == owner.username and not user.profile.is_banned %}
-			<form action="{% url 'editprofile' %}" method="post" id="editForm">
-				{% csrf_token %}
-				<label for="desc">Description:</label><br>
-				<textarea cols="80" rows="6" id="desc" name="desc">{{ owner.profile.description }}</textarea><br>
-				<button type="submit" class="btn">Submit</button>
-			</form>
-			<button type="button" class="btn" style="display: none;" id="editButton">Edit Description</button>
-			<script>
-				document.getElementById("editForm").style.display = "none";
-				document.getElementById("editButton").style.display = "block";
-				document.getElementById("editButton").onclick = enableEdit;
-			</script>
-			{% endif %}
-		</div>
 		{% if user.profile.is_admin %}
 		<div style="margin-top: 20px">
 			{% if owner.ban %}
