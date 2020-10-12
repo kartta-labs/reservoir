@@ -359,7 +359,11 @@ def user(request, username):
         results = []
 
     try:
-        token = Token.objects.get(user=user)
+        if username == user.username:
+            token = Token.objects.get(user=user)
+            key = token.key
+        else:
+            key = None
     except:
         logger.warning('User does not have a token')
         token = None
@@ -371,7 +375,7 @@ def user(request, username):
             'models': results,
             'changes': changes,
             'ban': user.ban_set.all().first(),
-            'api_key': token.key
+            'api_key': key,
         },
         'paginator': paginator,
         'page_id': page_id,
