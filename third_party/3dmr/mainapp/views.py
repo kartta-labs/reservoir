@@ -359,11 +359,13 @@ def user(request, username):
         results = []
 
     try:
-        if username == user.username:
+        if username == request.user.username:
             token = Token.objects.get(user=user)
             key = token.key
+            logging.debug('Client is owner, setting key to token.')
         else:
             key = None
+            logging.debug('Client is not owner, setting key to None.')
     except:
         logger.warning('User does not have a token')
         token = None
