@@ -142,8 +142,12 @@ class UploadFileForm(forms.Form):
 
 class MetadataForm(forms.Form):
     title = forms.CharField(
-        label='Name', min_length=1, max_length=32, required=True,
+        label='Title', min_length=1, max_length=32, required=True,
         widget=forms.TextInput(attrs={'placeholder': 'Eiffel Tower'}))
+
+    building_id = forms.CharField(
+        label='Building Id', min_length=1, max_length=32, required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'way/123'}))
 
     description = forms.CharField(
         label='Description', max_length=512,
@@ -159,7 +163,7 @@ class MetadataForm(forms.Form):
 
     categories = CategoriesField(
         label='Categories', max_length=1024, required=False)
-    
+
     tags = TagField(
         label='Tags', max_length=1024, required=False)
 
