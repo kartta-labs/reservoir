@@ -71,7 +71,8 @@ def get_or_create_authenticated_user(request):
         # Hack, the User object requires a string at construction.
         # The random suffix is to avoid primary key conflicts if two new
         # users visit reservoir simultaneously.
-        display_name = 'UNKNOWN_EDITOR_USERNAME_{}'.format(binascii.b2a_hex(os.urandom(8)))
+        display_name = 'UNKNOWN_EDITOR_USERNAME_%s' % binascii.b2a_hex(os.urandom(8)).decode('utf-8')
+        logger.debug('No username in Editor, setting display_name in reservoir to: {}'.format(display_name))
 
 
 
