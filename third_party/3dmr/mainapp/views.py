@@ -290,6 +290,7 @@ def upload(request):
 
             m = database.upload(model_file, {
                 'title': form.cleaned_data['title'].strip(),
+                'building_id': form.cleaned_data['building_id'].strip(),
                 'description': form.cleaned_data['description'].strip(),
                 'latitude': form.cleaned_data['latitude'],
                 'longitude': form.cleaned_data['longitude'],
