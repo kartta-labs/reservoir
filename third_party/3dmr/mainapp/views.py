@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 def index(request):
 
-    if request.user.username == '':
+    if 'UNKNOWN_EDITOR_USERNAME' in request.user.username:
         logger.info('Unknown username, redirecting to Editor.')
         return redirect('/e/')
     elif request.user.is_authenticated:

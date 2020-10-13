@@ -1,3 +1,6 @@
+import binascii
+import os
+
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.utils.deprecation import MiddlewareMixin
@@ -65,7 +68,11 @@ def get_or_create_authenticated_user(request):
     # If the editor DB is not aware of this user return None.
     if not display_name:
         logging.info('No display name found.')
-        display_name = '' # Hack, the User object requires a string at construction.
+        # Hack, the User object requires a string at construction.
+        # The random suffix is to avoid primary key conflicts if two new
+        # users visit reservoir simultaneously.
+        display_name = 'UNKNOWN_EDITOR_USERNAME_{}'.format(binascii.b2a_hex(os.urandom(8)))
+
 
 
     # If Reservoir is not aware of this user, create one
