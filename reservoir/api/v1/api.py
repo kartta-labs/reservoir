@@ -17,6 +17,7 @@ from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from .database import get_model_path, delete_model
@@ -101,6 +102,13 @@ class UserSerializer(serializers.Serializer):
 
 class DownloadBatchBuildingIdSerializer(serializers.Serializer):
     building_ids = serializers.ListField(child=serializers.CharField())
+
+# For serializing model DB entries as JSON
+class ModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Model
+        depth = 1
+        fields = ['model_id', 'title', 'building_id', 'location', 'tags']
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -212,15 +220,17 @@ def download_batch_building_id(request):
                 latest_model = get_object_or_404(LatestModel, model_id=model_id)
                 revision = latest_model.revision
                 model_path = get_model_path(model_id, revision)
-                logging.debug(
-                    'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
-                        building_id, model_id, revision, model_path))
-                metadata[building_id] = json.loads(serialize('json', [model]))
-                logging.debug('metadata: {}'.format(metadata))
+
+                # logging.debug(
+                #     'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
+                #         building_id, model_id, revision, model_path))
+
+                metadata[building_id] = json.loads(JSONRenderer().render(ModelSerializer(model).data))
+                # logging.debug('metadata: {}'.format(metadata))
+
                 filename = "{}.zip".format(building_id.replace('/','_'))
-                for modeljson in metadata[building_id]:
-                    modeljson['filename'] = filename
-                    logging.debug('modeljson: {}'.format(modeljson))
+                metadata[building_id]['filename'] = filename
+
 
                 zf.write(model_path, '{}.zip'.format(building_id.replace('/', '_')))
         zf.writestr('metadata.json', json.dumps(metadata))
