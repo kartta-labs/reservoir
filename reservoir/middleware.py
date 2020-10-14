@@ -1,8 +1,5 @@
-import binascii
-import os
-
 from django.contrib import auth
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
 from django.conf import settings
@@ -60,21 +57,15 @@ def get_or_create_authenticated_user(request):
     email = request.META.pop('HTTP_X_EMAIL', None)
     if not email:
         logger.debug('No email found in header.')
-        return None
+        return AnonymousUser()
 
     # Get the display name from editor DB
     display_name = editor_client.GetUserFromEmail(email)
 
     # If the editor DB is not aware of this user return None.
     if not display_name:
-        logging.info('No display name found.')
-        # Hack, the User object requires a string at construction.
-        # The random suffix is to avoid primary key conflicts if two new
-        # users visit reservoir simultaneously.
-        display_name = 'UNKNOWN_EDITOR_USERNAME_%s' % binascii.b2a_hex(os.urandom(8)).decode('utf-8')
-        logger.debug('No username in Editor, setting display_name in reservoir to: {}'.format(display_name))
-
-
+        logging.info('No display name found in Editor.')
+        return AnonymousUser()
 
     # If Reservoir is not aware of this user, create one
     if not User.objects.filter(email=email).exists():
