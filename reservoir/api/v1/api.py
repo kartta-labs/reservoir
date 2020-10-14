@@ -108,7 +108,19 @@ class ModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Model
         depth = 1
-        fields = ['model_id', 'title', 'building_id', 'location', 'tags']
+        fields = [
+            'model_id',
+            'revision',
+            'title',
+            'building_id',
+            'location',
+            'rotation',
+            'scale',
+            'translation_x',
+            'translation_y',
+            'translation_z',
+            'upload_date',
+            'tags']
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
