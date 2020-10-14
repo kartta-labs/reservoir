@@ -172,6 +172,7 @@ def edit(request, model_id, revision):
         elif form.is_valid():
             status = database.edit({
                 'title': form.cleaned_data['title'].strip(),
+                'building_id': form.cleaned_data['building_id'].strip(),
                 'description': form.cleaned_data['description'].strip(),
                 'latitude': form.cleaned_data['latitude'],
                 'longitude': form.cleaned_data['longitude'],

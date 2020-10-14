@@ -137,13 +137,16 @@ def edit(options):
             rendered_description = markdown(options['description'])
             m.rendered_description = rendered_description
 
+            if options.get('building_id'):
+                m.building_id = options.get('building_id')
+
             m.categories.clear()
             for category_name in options['categories']:
                 try:
                     category = Category.objects.get(name=category_name)
                 except:
                     category = Category(name=category_name)
-                
+
                 category.save()
                 m.categories.add(category)
 
@@ -168,7 +171,7 @@ def edit(options):
                 location.delete()
 
             m.save()
-            
+
             return True
     except:
         logger.exception('Fatal server error when editing metadata.')
