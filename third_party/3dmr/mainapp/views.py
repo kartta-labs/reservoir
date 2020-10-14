@@ -204,6 +204,7 @@ def edit(request, model_id, revision):
         initial = {
             'title': m.title,
             'description': m.description,
+            'building_id': m.building_id,
             'tags': ', '.join(tags),
             'categories': ', '.join(m.categories.all().values_list('name', flat=True)[::1]),
             # "+ 0" fixes negative zero float (-0.0)
