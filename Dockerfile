@@ -33,12 +33,8 @@ COPY . "/${PROJECT_NAME}"
 WORKDIR "/${PROJECT_NAME}"
 ADD . "/${PROJECT_NAME}"
 
-RUN pip3 install -r "/${PROJECT_NAME}/requirements.txt" -r "/${PROJECT_NAME}/third_party/3dmr/requirements.txt" 
+RUN pip3 install -r "/${PROJECT_NAME}/requirements.txt" -r "/${PROJECT_NAME}/third_party/3dmr/requirements.txt"
 
-# Set up a log file with correct permissions for cloud-logging
-RUN touch "/var/log/${APPLICATION_NAME}.log"
-RUN chmod a+wr "/var/log/${APPLICATION_NAME}.log"
-RUN chown :www-data "/var/log/${APPLICATION_NAME}.log"
 
 # Set up the hosted static files.
 RUN echo "${RESERVOIR_STATIC_ROOT}"
@@ -48,9 +44,12 @@ RUN mkdir -p "${RESERVOIR_STATIC_ROOT}"
 RUN python3 manage.py collectstatic
 
 RUN chown -R :www-data "${RESERVOIR_STATIC_ROOT}"
-RUN chmod -R 0755 "${RESERVOIR_STATIC_ROOT}"
+RUN chmod -R 0776 "${RESERVOIR_STATIC_ROOT}"
+# Directory inherits rights of group owner of directory.
+RUN chmod g+s "${RESERVOIR_STATIC_ROOT}"
 
 RUN chown -R :www-data "/${PROJECT_NAME}/${APPLICATION_NAME}"
+RUN chmod -R 0776 "/${PROJECT_NAME}/${APPLICATION_NAME}"
 RUN chmod a+x "/${PROJECT_NAME}/${APPLICATION_NAME}/wsgi.py"
 
 # Copy the apache2 config to sites-available
