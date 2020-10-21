@@ -25,6 +25,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from distutils.util import strtobool
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,7 +38,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '5a-%%8)gkf#hq5&!#6(w+6xyra(!fx3lm4y3+jhrb=9)p@qh!o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('RESERVOIR_DEBUG', True)
+RESERVOIR_DEBUG = os.environ.get('RESERVOIR_DEBUG', False)
+if isinstance(RESERVOIR_DEBUG, str):
+    print('RESERVOIR_DEBUG was a string')
+    RESERVOIR_DEBUG = bool(strtobool(RESERVOIR_DEBUG))
+
+print('RESERVOIR_DEBUG: {}'.format(RESERVOIR_DEBUG))
+
+DEBUG = RESERVOIR_DEBUG
 
 ALLOWED_HOSTS = ['*']
 
