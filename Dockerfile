@@ -44,9 +44,12 @@ RUN mkdir -p "${RESERVOIR_STATIC_ROOT}"
 RUN python3 manage.py collectstatic
 
 RUN chown -R :www-data "${RESERVOIR_STATIC_ROOT}"
-RUN chmod -R 0755 "${RESERVOIR_STATIC_ROOT}"
+RUN chmod -R 0776 "${RESERVOIR_STATIC_ROOT}"
+# Directory inherits rights of group owner of directory.
+RUN chmod g+s "${RESERVOIR_STATIC_ROOT}"
 
 RUN chown -R :www-data "/${PROJECT_NAME}/${APPLICATION_NAME}"
+RUN chmod -R 0776 "/${PROJECT_NAME}/${APPLICATION_NAME}"
 RUN chmod a+x "/${PROJECT_NAME}/${APPLICATION_NAME}/wsgi.py"
 
 # Copy the apache2 config to sites-available
