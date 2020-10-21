@@ -192,16 +192,9 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/reservoir.log',
-            'maxBytes': 1024*1024*15, # 15MB
-            'backupCount': 10,
-            'formatter': 'simple',
-        }
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': ['console'],
         'level': os.environ.get('RESERVOIR_LOG_LEVEL', 'DEBUG'),
     }
 }
