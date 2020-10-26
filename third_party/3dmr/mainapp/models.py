@@ -1,14 +1,18 @@
 from django.db import models
 from django.contrib.postgres import fields
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from django_pgviews import view as pg
 
+import logging
+
 from .utils import CHANGES
 
 from rest_framework.authtoken.models import Token
+
+logger = logging.getLogger(__name__)
 
 # Create your models here.
 class Profile(models.Model):
@@ -133,6 +137,11 @@ class ModelCategories(pg.View):
 
 @receiver(post_save, sender=Model)
 def model_saved(sender, action=None, instance=None, **kwargs):
+    LatestModel.refresh(concurrently=True)
+
+@receiver(post_delete, sender=Model)
+def model_deleted(sender, action=None, instance=None, **kwargs):
+    logger.debug('Refreshing LatestModel after Model delete.')
     LatestModel.refresh(concurrently=True)
 
 class Change(models.Model):
