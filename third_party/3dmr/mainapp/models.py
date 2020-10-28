@@ -72,6 +72,7 @@ class Model(models.Model):
 class LatestModel(pg.MaterializedView):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     model_id = models.IntegerField()
+    building_id = models.CharField(max_length=1024)
     revision = models.IntegerField()
     title = models.CharField(max_length=32)
     description = models.CharField(max_length=512)
@@ -93,6 +94,7 @@ class LatestModel(pg.MaterializedView):
         SELECT
             model.id AS id,
             model.model_id AS model_id,
+            model.building_id AS building_id,
             model.revision AS revision,
             model.title AS title,
             model.description AS description,
@@ -108,8 +110,8 @@ class LatestModel(pg.MaterializedView):
             model.author_id AS author_id,
             model.tags AS tags,
             model.is_hidden AS is_hidden
-        FROM mainapp_model model 
-            LEFT JOIN mainapp_model newer 
+        FROM mainapp_model model
+            LEFT JOIN mainapp_model newer
                 ON model.model_id = newer.model_id AND
                    model.revision < newer.revision
         WHERE newer.revision is NULL
