@@ -33,6 +33,7 @@ COPY . "/${PROJECT_NAME}"
 WORKDIR "/${PROJECT_NAME}"
 ADD . "/${PROJECT_NAME}"
 
+RUN export MAKEFLAGS="-j$(nproc)"
 RUN pip3 install -r "/${PROJECT_NAME}/requirements.txt" -r "/${PROJECT_NAME}/third_party/3dmr/requirements.txt"
 
 
