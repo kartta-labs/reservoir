@@ -21,6 +21,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from .database import get_model_path, delete_model
+from .utils import build_revision_options
 
 DEFAULT_MAX_CHAR_LENGTH = 128
 
@@ -39,8 +40,7 @@ MODEL_DIR = getattr(importlib.import_module('third_party.3dmr.mainapp.utils'), '
 logger = logging.getLogger(__name__)
 
 LICENSE_CHOICES = [
-    (0, 'Creative Commons CC0 1.0 Universal Public Domain Dedication'),
-    (1, 'Creative Commons Attribution 4.0 Internal license')
+    (0, 'Open Data Commons Open Database License (ODbL)'),
 ]
 
 
@@ -431,40 +431,91 @@ def upload(request):
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
 
-    if serialized_model.is_valid():
-        model_metadata = ModelFileMetadataSerializer(data=serialized_model.validated_data.get('metadata'))
-    else:
+    if not serialized_model.is_valid():
         err_msg = 'Failed to validate model payload: {}'.format(serialized_model.errors)
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
 
-    if model_metadata.is_valid():
-        logger.debug('Upload payload verified.')
-        logger.debug('Validated meta data: {}'.format(model_metadata.validated_data))
+    model_file = serialized_model.validated_data.get('model_file')
+    model_metadata = ModelFileMetadataSerializer(data=serialized_model.validated_data.get('metadata'))
+
+    if not model_metadata.is_valid():
+        err_msg = 'model_metadata is not valid: {}'.format(model_metadata.errors)
+        logger.warning(err_msg)
+        return HttpResponseBadRequest(err_msg)
+
+
+    logger.debug('Upload payload verified.')
+    logger.debug('Validated meta data: {}'.format(model_metadata.validated_data))
+    validated_data = model_metadata.validated_data
+    building_id = validated_data.get('building_id')
+
+    model = None
+
+    if not building_id:
+        logging.debug('building_id was not provided in upload request.')
         try:
-            model = database.upload(serialized_model.validated_data.get('model_file'),
-                                    {'title': model_metadata.validated_data.get('title'),
-                                     'building_id': model_metadata.validated_data.get('building_id'),
-                                     'description': model_metadata.validated_data.get('description'),
-                                     'latitude': model_metadata.validated_data.get('latitude'),
-                                     'longitude': model_metadata.validated_data.get('longitude'),
-                                     'categories': model_metadata.validated_data.get('categories'),
-                                     'tags': model_metadata.validated_data.get('tags'),
-                                     'origin': model_metadata.validated_data.get('origin'),
-                                     'translation': model_metadata.validated_data.get('translation'),
-                                     'rotation': model_metadata.validated_data.get('rotation'),
-                                     'scale': model_metadata.validated_data.get('scale'),
-                                     'license':model_metadata.validated_data.get('license', None),
-                                     'author':request.user})
+            model = database.upload(model_file, {
+                'title': validated_data.get('title'),
+                'building_id': validated_data.get('building_id'),
+                'description': validated_data.get('description'),
+                'latitude': validated_data.get('latitude'),
+                'longitude': validated_data.get('longitude'),
+                'categories': validated_data.get('categories'),
+                'tags': validated_data.get('tags'),
+                'origin': validated_data.get('origin'),
+                'translation': validated_data.get('translation'),
+                'rotation': validated_data.get('rotation'),
+                'scale': validated_data.get('scale'),
+                'license': validated_data.get('license', None),
+                'author':request.user
+            })
         except:
             err_msg = 'Failed to upload model.'
             logger.warning(err_msg)
             return HttpResponseServerError(err_msg)
-
     else:
-        err_msg = 'Failed to validate upload_model payload.'
-        logger.warning(err_msg)
-        return HttpResponseBadRequest(err_msg)
+        logging.debug('Revising building_id: {}'.format(building_id))
+        m = LatestModel.objects.filter(building_id=building_id).order_by('revision').first()
+
+        if not m:
+            logging.debug('No existing model with building_id: {}'.format(building_id))
+            try:
+                model = database.upload(model_file, {
+                    'title': model_metadata.validated_data.get('title'),
+                    'building_id': validated_data.get('building_id'),
+                    'description': validated_data.get('description'),
+                    'latitude': validated_data.get('latitude'),
+                    'longitude': validated_data.get('longitude'),
+                    'categories': validated_data.get('categories'),
+                    'tags': validated_data.get('tags'),
+                    'origin': validated_data.get('origin'),
+                    'translation': validated_data.get('translation'),
+                    'rotation': validated_data.get('rotation'),
+                    'scale': validated_data.get('scale'),
+                    'license':validated_data.get('license', None),
+                    'author':request.user
+                })
+            except:
+                err_msg = 'Failed to upload model.'
+                logger.warning(err_msg)
+                return HttpResponseServerError(err_msg)
+        else:
+            logging.debug('Found existing model with building_id {} and model_id {}'.format(building_id, m.model_id))
+
+            try:
+                model = database.upload(model_file,
+                                        build_revision_options(
+                                            m,
+                                            model_file,
+                                            validated_data,
+                                            request.user))
+
+            except:
+                err_msg = 'Failed to revise model with building id: {}'.format(building_id)
+                logger.warning(err_msg)
+                return HttpResponseServerError(err_msg)
+
 
     response_data = {
         "model_id": model.model_id,

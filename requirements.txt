@@ -2,4 +2,5 @@
 # See Dockerfile for example pip invocation.
 djangorestframework==3.11.*
 mod_wsgi-standalone
+django-extensions
 
