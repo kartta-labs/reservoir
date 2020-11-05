@@ -1,7 +1,9 @@
 import importlib
 import logging
+import glob
 import os
 import shutil
+import sys
 
 mainapp_database = importlib.import_module('third_party.3dmr.mainapp.database')
 mainapp_upload = getattr(mainapp_database, 'upload')
@@ -25,18 +27,21 @@ def run(*args):
     mainapp_location.objects.all().delete()
     mainapp_change.objects.all().delete()
 
-    logger.info('Deleting all modle files on disk.')
-    failed_paths = []
-    for root, dirs, files in os.walk(MODEL_DIR):
-        for dir_name in dirs:
-            target_dir = os.path.join(root, dir_name)
-            logger.info('Deleting {}'.format(target_dir))
-            try:
-                shutil.rmtree(target_dir)
-            except Exception as e:
-                failed_paths.append(target_dir)
-                logger.error('Failed to delete {} for Reason: {}'.format(target_dir, e))
 
+    model_dir_glob = os.path.join(MODEL_DIR,'[0-9]*')
+    logger.info('model_dir_glob = {}'.format(model_dir_glob))
+
+    paths_to_delete = glob.glob(model_dir_glob)
+    logger.info('Found {} paths to delete.'.format(len(paths_to_delete)))
+    failed_paths = []
+    for target_dir in paths_to_delete:
+        try:
+            logger.info('Deleting {}'.format(target_dir))
+            shutil.rmtree(target_dir)
+        except:
+            e = sys.exc_info()[0]
+            logger.error('Failed to delete {}, reason: {}'.format(target_dir, e))
+            failed_paths.append(target_dir)
 
     if failed_paths:
         logger.error('Failed to delete all models on disk: {}'.format(failed_paths))
