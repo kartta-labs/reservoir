@@ -47,7 +47,7 @@ print('RESERVOIR_DEBUG: {}'.format(RESERVOIR_DEBUG))
 
 DEBUG = RESERVOIR_DEBUG
 
-ALLOWED_HOSTS = [os.environ.get('SERVER_NAME', '*')]
+ALLOWED_HOSTS = [os.environ.get('SERVER_NAME', '*'), 'reservoir']
 print('ALLOWED_HOSTS: {}'.format(ALLOWED_HOSTS))
 
 RESERVOIR_SITE_PREFIX = os.environ.get('RESERVOIR_SITE_PREFIX', '')
