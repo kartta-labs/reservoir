@@ -227,9 +227,8 @@ def download_batch_building_id(request):
     with zipfile.ZipFile(buf, 'a', zipfile.ZIP_STORED, False) as zf:
         for model_id_list in Model.objects.filter(building_id__in=building_ids).values_list('model_id').distinct():
             model_id = model_id_list[0]
-            lm = LatestModel.objects.filter(model_id=model_id).order_by('-id').first()
-            if not metadata.get(lm.building_id) and not lm.is_hidden:
-                latest_model = LatestModel.objects.filter(model_id=model_id).order_by('-id').first()
+            latest_model = LatestModel.objects.filter(model_id=model_id).order_by('-id').first()
+            if not metadata.get(latest_model.building_id) and not latest_model.is_hidden:
                 revision = latest_model.revision
                 model_path = get_model_path(model_id, revision)
 
