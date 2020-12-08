@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 
 mainapp_models = importlib.import_module('third_party.3dmr.mainapp.models')
 mainapp_model = getattr(mainapp_models, 'Model')
+mainapp_latest_model = getattr(mainapp_models, 'LatestModel')
 
 
 def build_revision_options(model, model_file, validated_data, author):
@@ -48,3 +49,6 @@ def build_revision_options(model, model_file, validated_data, author):
     options['author'] = author
 
     return options
+
+def get_latest_model_by_model_id(model_id):
+    return mainapp_latest_model.objects.filter(model_id=model_id).order_by('-id').first()
