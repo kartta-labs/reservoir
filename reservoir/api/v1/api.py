@@ -4,6 +4,7 @@ import json
 import os
 import io
 import time
+import uuid
 import zipfile
 from zipfile import ZipFile, BadZipFile
 
@@ -209,18 +210,20 @@ def download_batch_building_id(request):
       -o ~/Downloads/somefile.zip
     """
     start = time.perf_counter()
-    logging.info('Batch download via building id list.')
+    request_id = uuid.uuid4() # Generate a unique ID for the request to match log statements.
+    logging.info('{} Batch download via building id list, uid'.format(request_id))
     building_id_serializer = DownloadBatchBuildingIdSerializer(data=request.data)
 
     building_ids = []
     if building_id_serializer.is_valid():
         building_ids = building_id_serializer.data.get('building_ids')
         logging.debug(
-            'Request for building_ids: {}'.format(building_ids))
+            '{} Request for building_ids: {}'.format(request_id, building_ids))
     else:
         logging.error(
             'Unable to parse input building ids: {}'.format(request.data))
         return HttpResponseBadRequest()
+
 
     metadata = {}
     buf = io.BytesIO()
@@ -230,14 +233,14 @@ def download_batch_building_id(request):
             latest_model = LatestModel.objects.filter(model_id=model_id).order_by('-id').first()
             if not metadata.get(latest_model.building_id) and not latest_model.is_hidden:
                 revision = latest_model.revision
+                building_id = latest_model.building_id
                 model_path = get_model_path(model_id, revision)
 
-                # logging.debug(
-                #     'building_id: {}, model_id: {}, revision: {}, model_path: {}'.format(
-                #         building_id, model_id, revision, model_path))
+                logging.debug(
+                    '{} Packing model with: model_id: {}, building_id: {}, model_path: {}'.format(
+                        request_id, model_id, building_id, model_path))
 
-                metadata[building_id] = json.loads(JSONRenderer().render(ModelSerializer(model).data))
-                # logging.debug('metadata: {}'.format(metadata))
+                metadata[building_id] = json.loads(JSONRenderer().render(ModelSerializer(latest_model).data))
 
                 filename = "{}.zip".format(building_id.replace('/','_'))
                 metadata[building_id]['filename'] = filename
@@ -255,8 +258,8 @@ def download_batch_building_id(request):
     end = time.perf_counter()
 
     logging.debug(
-        'Batch download of {} building ids completed in {} seconds.'.format(
-            len(building_ids), end-start))
+        '{} Batch download of {} building ids completed in {} seconds'.format(
+            request_id, len(building_ids), end-start))
 
     return response
 
