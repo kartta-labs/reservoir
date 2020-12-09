@@ -15,10 +15,9 @@ logger = logging.getLogger(__name__)
 def upload(model_file, options={}):
     try:
         with transaction.atomic():
-            if options.get('revision', False):
-                lm = LatestModel.objects.get(model_id=options['model_id'])
-                m = Model.objects.get(model_id=lm.model_id, revision=lm.revision)
+            m = Model.objects.filter(model_id=options['model_id']).latest('id', 'revision')
 
+            if options.get('revision', False):
                 location = m.location
                 if location is not None:
                     location.pk = None
@@ -37,7 +36,7 @@ def upload(model_file, options={}):
             else:
                 # get the model_id for this model.
                 try:
-                    next_model_id = LatestModel.objects.latest('model_id').model_id + 1
+                    next_model_id = m.model_id + 1
                 except LatestModel.DoesNotExist:
                     next_model_id = 1 # no models in db
 
@@ -110,7 +109,7 @@ def upload(model_file, options={}):
 
         # We should have verified everything to do with 1) earlier,
         # and notified the user if there was any error. Thus, it's
-        # unlikely to be 1). 
+        # unlikely to be 1).
 
         # Thus, we can assume that 2) and 3) are server errors, and that
         # the user can do nothing about them. Thus, report this.
