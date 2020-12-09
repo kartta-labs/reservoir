@@ -231,6 +231,11 @@ def download_batch_building_id(request):
         for model_id_list in Model.objects.filter(building_id__in=building_ids).values_list('model_id').distinct():
             model_id = model_id_list[0]
             latest_model = get_latest_model_by_model_id(model_id)
+
+            if not latest_model:
+                logging.error('{} No latest_model for model_id {}, this should not happen...'.format(
+                    request_id, model_id))
+
             if not metadata.get(latest_model.building_id) and not latest_model.is_hidden:
                 revision = latest_model.revision
                 building_id = latest_model.building_id
