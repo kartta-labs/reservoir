@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def upload(model_file, options={}):
     try:
         with transaction.atomic():
-            m = Model.objects.filter(model_id=options['model_id']).latest('id', 'revision')
+            m = Model.objects.filter(model_id=options['model_id']).latest('revision', 'id')
 
             if options.get('revision', False):
                 location = m.location
