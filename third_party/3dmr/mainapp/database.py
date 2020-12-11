@@ -15,9 +15,8 @@ logger = logging.getLogger(__name__)
 def upload(model_file, options={}):
     try:
         with transaction.atomic():
-            m = Model.objects.filter(model_id=options['model_id']).latest('revision', 'id')
-
             if options.get('revision', False):
+                m = Model.objects.filter(model_id=options['model_id']).latest('revision', 'id')
                 location = m.location
                 if location is not None:
                     location.pk = None
@@ -30,14 +29,11 @@ def upload(model_file, options={}):
                 m.author = options['author']
                 m.location = location
                 m.save()
-
-                m.categories.add(*lm.categories.all())
-                m.save()
             else:
                 # get the model_id for this model.
                 try:
-                    next_model_id = m.model_id + 1
-                except LatestModel.DoesNotExist:
+                    next_model_id =  Model.objects.latest('id').id + 1
+                except Model.DoesNotExist:
                     next_model_id = 1 # no models in db
 
                 rendered_description = markdown(options['description'])

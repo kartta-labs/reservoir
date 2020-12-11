@@ -51,7 +51,7 @@ def build_revision_options(model, model_file, validated_data, author):
     return options
 
 def get_latest_model_by_model_id(model_id):
-    query_set = mainapp_latest_model.objects.filter(model_id=model_id).order_by('-id')
+    query_set = mainapp_model.objects.filter(model_id=model_id).latest('revision', 'id')
 
     if not query_set:
         return None
