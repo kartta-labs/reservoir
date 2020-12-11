@@ -22,7 +22,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from .database import get_model_path, delete_model
-from .utils import build_revision_options
+from .utils import build_revision_options, get_latest_model_by_model_id
 
 DEFAULT_MAX_CHAR_LENGTH = 128
 
@@ -230,7 +230,12 @@ def download_batch_building_id(request):
     with zipfile.ZipFile(buf, 'a', zipfile.ZIP_STORED, False) as zf:
         for model_id_list in Model.objects.filter(building_id__in=building_ids).values_list('model_id').distinct():
             model_id = model_id_list[0]
-            latest_model = LatestModel.objects.filter(model_id=model_id).order_by('-id').first()
+            latest_model = get_latest_model_by_model_id(model_id)
+
+            if not latest_model:
+                logging.error('{} No latest_model for model_id {}, this should not happen...'.format(
+                    request_id, model_id))
+
             if not metadata.get(latest_model.building_id) and not latest_model.is_hidden:
                 revision = latest_model.revision
                 building_id = latest_model.building_id
@@ -422,40 +427,46 @@ def upload(request):
     http://localhost:8080/api/v1/upload/
     """
 
-    logger.debug('{} requests file upload.'.format(request.user.username))
+    request_id = uuid.uuid4() # Generate a unique ID for the request to match log statements.
+    logger.debug('{} {} requests file upload.'.format(
+        request_id, request.user.username))
 
     try:
         serialized_model = ModelFileSerializer(data=request.data)
     except:
         import sys, traceback
         traceback.print_exc(file=sys.stdout)
-        err_msg = 'Faild to validate model file upload request data.'
+        err_msg = '{} Faild to validate model file upload request data.'.format(request_id)
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
 
     if not serialized_model.is_valid():
-        err_msg = 'Failed to validate model payload: {}'.format(serialized_model.errors)
+        err_msg = '{} Failed to validate model payload: {}'.format(
+            request_id, serialized_model.errors)
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
 
     model_file = serialized_model.validated_data.get('model_file')
-    model_metadata = ModelFileMetadataSerializer(data=serialized_model.validated_data.get('metadata'))
+    model_metadata = ModelFileMetadataSerializer(
+        data=serialized_model.validated_data.get('metadata'))
 
     if not model_metadata.is_valid():
-        err_msg = 'model_metadata is not valid: {}'.format(model_metadata.errors)
+        err_msg = '{} model_metadata is not valid: {}'.format(
+            request_id, model_metadata.errors)
         logger.warning(err_msg)
         return HttpResponseBadRequest(err_msg)
 
 
-    logger.debug('Upload payload verified.')
-    logger.debug('Validated meta data: {}'.format(model_metadata.validated_data))
+    logger.debug('{} Upload payload verified.'.format(request_id))
+    logger.debug('{} Validated meta data: {}'.format(
+        request_id, model_metadata.validated_data))
     validated_data = model_metadata.validated_data
     building_id = validated_data.get('building_id')
 
     model = None
-
     if not building_id:
-        logging.debug('building_id was not provided in upload request.')
+        logging.debug(
+            '{} building_id was not provided in upload request.'.format(request_id))
         try:
             model = database.upload(model_file, {
                 'title': validated_data.get('title'),
@@ -477,11 +488,31 @@ def upload(request):
             logger.warning(err_msg)
             return HttpResponseServerError(err_msg)
     else:
-        logging.debug('Revising building_id: {}'.format(building_id))
-        m = LatestModel.objects.filter(building_id=building_id).order_by('revision').first()
+        logging.debug('{} Revising building_id: {}'.format(request_id, building_id))
+        try:
+            m = Model.objects.filter(building_id = building_id).latest('revision', 'id')
 
-        if not m:
-            logging.debug('No existing model with building_id: {}'.format(building_id))
+            logging.debug(
+                '{} Found existing model with building_id {} and model_id {}'.format(
+                    request_id, building_id, m.model_id))
+
+            try:
+                model = database.upload(model_file,
+                                        build_revision_options(
+                                            m,
+                                            model_file,
+                                            validated_data,
+                                            request.user))
+
+            except:
+                err_msg = '{} Failed to revise model with building id: {}'.format(
+                    request_id, building_id)
+                logger.warning(err_msg)
+                return HttpResponseServerError(err_msg)
+
+        except Model.DoesNotExist:
+            logging.debug('{} No existing model with building_id: {}'.format(request_id, building_id))
+
             try:
                 model = database.upload(model_file, {
                     'title': model_metadata.validated_data.get('title'),
@@ -499,27 +530,16 @@ def upload(request):
                     'author':request.user
                 })
             except:
-                err_msg = 'Failed to upload model.'
+                err_msg = '{} database.upload failed.'.format(request_id)
                 logger.warning(err_msg)
                 return HttpResponseServerError(err_msg)
-        else:
-            logging.debug('Found existing model with building_id {} and model_id {}'.format(building_id, m.model_id))
-
-            try:
-                model = database.upload(model_file,
-                                        build_revision_options(
-                                            m,
-                                            model_file,
-                                            validated_data,
-                                            request.user))
-
-            except:
-                err_msg = 'Failed to revise model with building id: {}'.format(building_id)
-                logger.warning(err_msg)
-                return HttpResponseServerError(err_msg)
-
+        except:
+            err_msg = '{} Unknown server error'.format(request_id)
+            logger.warning(err_msg)
+            return HttpResponseServerError(err_msg)
 
     response_data = {
+        "request_id": request_id, # Match request to log statements.
         "model_id": model.model_id,
         "author": model.author.username,
         "revision": model.revision,
