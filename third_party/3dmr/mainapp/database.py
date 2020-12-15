@@ -3,6 +3,7 @@ import logging
 import mistune
 
 from django.db import transaction
+from django.db.models import F
 from django.contrib import messages
 
 from sequences import get_next_value
@@ -25,12 +26,19 @@ def upload(model_file, options={}):
                     location.id = None
                     location.save()
 
+                # Shortcut to create a copy -> insert
                 m.pk = None
                 m.id = None
-                m.revision += 1
+
                 m.author = options['author']
                 m.location = location
                 m.save()
+
+                # Query expressions can only update not insert on the copy.
+                # Which unfortunately requires two saves.
+                m.revision = F('revision') + 1
+                m.save()
+                m.refresh_from_db()
             else:
                 rendered_description = markdown(options['description'])
 
