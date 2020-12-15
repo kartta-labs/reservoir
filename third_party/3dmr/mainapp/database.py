@@ -5,6 +5,8 @@ import mistune
 from django.db import transaction
 from django.contrib import messages
 
+from sequences import get_next_value
+
 from .models import Model, LatestModel, Change, Category, Location
 from .utils import MODEL_DIR
 
@@ -30,12 +32,6 @@ def upload(model_file, options={}):
                 m.location = location
                 m.save()
             else:
-                # get the model_id for this model.
-                try:
-                    next_model_id =  Model.objects.latest('id').id + 1
-                except Model.DoesNotExist:
-                    next_model_id = 1 # no models in db
-
                 rendered_description = markdown(options['description'])
 
                 latitude = options['latitude']
@@ -52,7 +48,7 @@ def upload(model_file, options={}):
 
 
                 m = Model(
-                    model_id=next_model_id,
+                    model_id=get_next_value('model_id'),
                     revision=1,
                     title=options['title'],
                     building_id=options.get('building_id'),
