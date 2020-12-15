@@ -3,7 +3,10 @@ import logging
 import mistune
 
 from django.db import transaction
+from django.db.models import F
 from django.contrib import messages
+
+from sequences import get_next_value
 
 from .models import Model, LatestModel, Change, Category, Location
 from .utils import MODEL_DIR
@@ -23,19 +26,20 @@ def upload(model_file, options={}):
                     location.id = None
                     location.save()
 
+                # Shortcut to create a copy -> insert
                 m.pk = None
                 m.id = None
-                m.revision += 1
+
                 m.author = options['author']
                 m.location = location
                 m.save()
-            else:
-                # get the model_id for this model.
-                try:
-                    next_model_id =  Model.objects.latest('id').id + 1
-                except Model.DoesNotExist:
-                    next_model_id = 1 # no models in db
 
+                # Query expressions can only update not insert on the copy.
+                # Which unfortunately requires two saves.
+                m.revision = F('revision') + 1
+                m.save()
+                m.refresh_from_db()
+            else:
                 rendered_description = markdown(options['description'])
 
                 latitude = options['latitude']
@@ -52,7 +56,7 @@ def upload(model_file, options={}):
 
 
                 m = Model(
-                    model_id=next_model_id,
+                    model_id=get_next_value('model_id'),
                     revision=1,
                     title=options['title'],
                     building_id=options.get('building_id'),

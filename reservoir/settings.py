@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'compressor',
     'social_django', # TODO: Remove me
     'django_pgviews',
+    'sequences.apps.SequencesConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'mod_wsgi.server',
