@@ -22,7 +22,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
 from .database import get_model_path, delete_model
-from .utils import build_revision_options, get_latest_model_by_model_id
+from .utils import build_revision_options
 
 DEFAULT_MAX_CHAR_LENGTH = 128
 
@@ -228,9 +228,13 @@ def download_batch_building_id(request):
     metadata = {}
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, 'a', zipfile.ZIP_STORED, False) as zf:
-        for model_id_list in Model.objects.filter(building_id__in=building_ids).values_list('model_id').distinct():
+
+        matching_models = Model.objects.filter(building_id__in=building_ids)
+        matching_model_ids = matching_models.values_list('model_id').distinct()
+
+        for model_id_list in matching_model_ids:
             model_id = model_id_list[0]
-            latest_model = get_latest_model_by_model_id(model_id)
+            latest_model = matching_models.filter(model_id=model_id).latest('revision','id')
 
             if not latest_model:
                 logging.error('{} No latest_model for model_id {}, this should not happen...'.format(
