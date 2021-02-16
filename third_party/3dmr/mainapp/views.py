@@ -271,6 +271,32 @@ def revise(request, model_id):
         'model': m
     })
 
+def delete(request, model_id):
+    if request.user.is_authenticated and request.user.profile.is_banned:
+        messages.error(request, 'You are banned. Revising models is not permitted.')
+        return redirect(index)
+
+    logger.debug('{} requests deletion of model_id {}'.format(request.user.username, model_id))
+
+    m = LatestModel.objects.get(model_id=model_id)
+
+    if request.user != m.author:
+        logger.warning(
+            'request.user: {}, request.user.username {}, m.author: {}'.format(
+                request.user, request.user.username, m.author))
+        messages.error(request, 'You must be the author of the model to delete it.')
+        return redirect(model, model_id=m.model_id, revision=m.revision)
+
+    if database.delete_model(options={'model_id': model_id}):
+        logger.info('Deleted model id: {}'.format(model_id))
+    else:
+        messages.error(request, 'Server error. Try again later.')
+        return redirect(model, model_id=m.model_id, revision=m.revision)
+
+
+    return redirect(user, request.user.username)
+
+
 def upload(request):
     update_last_page(request)
 
