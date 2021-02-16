@@ -79,6 +79,7 @@
 					{% if user.is_authenticated and model.author == user %}
 					<a href="{% url 'edit' model.model_id model.revision %}" class="btn btn-default" role="button">Edit Metadata</a>
 					<a href="{% url 'revise' model.model_id %}" class="btn btn-default" role="button">Revise</a>
+                                        <a href="{% url 'delete' model.model_id %}" class="btn btn-default" role="button">Delete</a>
 					{% endif %}
 					{% if user.is_authenticated and user.profile.is_admin %}
 					{% if model.is_hidden %}

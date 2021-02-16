@@ -21,7 +21,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 
-from .database import get_model_path, delete_model
+from .database import get_model_path
 from .utils import build_revision_options
 
 DEFAULT_MAX_CHAR_LENGTH = 128
@@ -155,7 +155,7 @@ def delete(request):
         'model_id': model_id,
     }
 
-    if delete_model(options):
+    if database.delete_model(options):
         logger.info('Deleted model id: {}'.format(data.get('model_id')))
     else:
         err_msg = 'Failed to delete model with id: {}'.format(data.get('model_id'))
