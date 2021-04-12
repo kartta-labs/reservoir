@@ -3,4 +3,5 @@
 djangorestframework==3.11.*
 mod_wsgi-standalone
 django-extensions
-
+django-coreapi
+pyyaml

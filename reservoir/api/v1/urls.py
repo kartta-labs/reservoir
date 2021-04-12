@@ -15,9 +15,11 @@
 # Routes to first version of reservoir API endpoints.
 
 from django.urls import path
+from rest_framework.documentation import include_docs_urls, get_schema_view
 from . import api
 
 urlpatterns = [
+    path('docs/', include_docs_urls(title='Reservoir API V1')),
     path('delete/', api.delete, name='v1_delete'),
     path('health/', api.health, name='v1_health'),
     path('new_token/', api.new_token, name='v1_new_token'),

@@ -75,6 +75,10 @@ INSTALLED_APPS = [
     'third_party.3dmr.mainapp',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+}
+
 # TODO: Remove social auth.
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_OPENSTREETMAP_KEY = 'VTwxvHwg0aeX6x30D1U9SK3JaQKcm8THrtJVsY9R'
